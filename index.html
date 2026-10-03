@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha de Palitos - Edição TV & Notebook</title>
+<title>⚔️ Batalha de Palitos</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
@@ -35,11 +35,9 @@ button, input, a { outline: none !important; }
 canvas{width:100%;height:100%;display:block}
 .controls{width:100%;padding:6px 10px;background:rgba(18,13,32,.98);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:60px;flex-shrink:0}
 .pad-group{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);padding:4px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
-.pad-label{color:#888;font-size:8px;font-weight:800;letter-spacing:1px;margin-right:2px}
-.btn-game{background:linear-gradient(180deg,#3a2d5e,#2b1f47);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 10px;font-weight:700;box-shadow:0 3px 6px rgba(0,0,0,.3);transition:transform.1s;font-size:11px}
+.pad-label{color:#888;font-size:9px;font-weight:800;letter-spacing:1px;margin-right:2px}
+.btn-game{background:linear-gradient(180deg,#3a2d5e,#2b1f47);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 12px;font-weight:700;box-shadow:0 3px 6px rgba(0,0,0,.3);transition:transform.1s;font-size:11px;cursor:pointer}
 .btn-fire-direct{width:54px;height:38px;background:linear-gradient(180deg,#ffd32a,#ff6b00);color:#000;font-weight:900;border:none;border-radius:10px;box-shadow:0 0 14px rgba(255,107,0,.5),0 3px 6px rgba(0,0,0,.3);font-size:10px;line-height:1.1;transition:transform.1s;cursor:pointer}
-.color-badge{display:inline-block;padding:2px 6px;border-radius:4px;color:#fff;font-weight:bold;font-size:10px;margin:0 2px}
-.bg-red{background:#e74c3c} .bg-green{background:#2ecc71} .bg-yellow{background:#f1c40f;color:#000} .bg-blue{background:#3498db}
 .modal-overlay{position:absolute;inset:0;background:rgba(5,3,12,.9);backdrop-filter:blur(8px);display:flex;justify-content:center;align-items:center;z-index:100;opacity:0;pointer-events:none;transition:opacity.3s}
 .modal-overlay.active{opacity:1;pointer-events:auto}
 .modal-card{background:linear-gradient(180deg,#241b3f,#1a132e);border:2px solid #f1c40f;border-radius:18px;padding:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 30px rgba(241,196,15,.2);width:290px;display:flex;flex-direction:column;gap:10px}
@@ -61,7 +59,7 @@ canvas{width:100%;height:100%;display:block}
 <div class="player-box right"><span class="player-label" id="enemyTeamLabel">🤖 ROBO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
 </div>
 <div class="turn-line" id="turnIndicator">
-🔴 Esquerda | 🟢 Direita | 🟡 / CH+ Mira+ | 🔵 / CH- Mira- | OK: Atirar
+SUA VEZ — USE O CONTROLE OU NAVEGADOR
 </div>
 <div class="canvas-container" id="canvasContainer">
 <canvas id="gameCanvas"></canvas>
@@ -70,13 +68,13 @@ canvas{width:100%;height:100%;display:block}
 <div class="controls">
 <div class="pad-group">
 <span class="pad-label">MOVER</span>
-<span class="color-badge bg-red">🔴 Esq</span>
-<span class="color-badge bg-green">🟢 Dir</span>
+<button class="btn-game" id="btnLeft" tabindex="-1">◀</button>
+<button class="btn-game" id="btnRight" tabindex="-1">▶</button>
 </div>
 <div class="pad-group">
 <span class="pad-label">MIRA</span>
-<span class="color-badge bg-yellow">🟡 / CH+</span>
-<span class="color-badge bg-blue">🔵 / CH-</span>
+<button class="btn-game" id="btnAngleUp" tabindex="-1">▲</button>
+<button class="btn-game" id="btnAngleDown" tabindex="-1">▼</button>
 </div>
 <div class="pad-group">
 <button class="btn-fire-direct" id="fireBtn" tabindex="-1">🔥<br><span id="powerText">40%</span></button>
@@ -151,7 +149,6 @@ projectile={x:hx+Math.cos(rad)*22*t.facing,y:sy-Math.sin(rad)*22,vx:Math.cos(rad
 }
 
 function drawBackground(){
-// Fundo em gradiente roxo/crepúsculo original
 let grad = ctx.createLinearGradient(0,0,0,logicalHeight);
 grad.addColorStop(0, '#150a21');
 grad.addColorStop(0.5, '#4a154b');
@@ -159,7 +156,6 @@ grad.addColorStop(1, '#8c245c');
 ctx.fillStyle = grad;
 ctx.fillRect(0,0,logicalWidth,logicalHeight);
 
-// Montanhas de fundo
 ctx.fillStyle = 'rgba(40, 15, 55, 0.6)';
 ctx.beginPath();
 ctx.moveTo(0, logicalHeight);
@@ -169,7 +165,6 @@ for(let x=0; x<=logicalWidth; x+=10){
 ctx.lineTo(logicalWidth, logicalHeight);
 ctx.fill();
 
-// Terreno principal
 ctx.beginPath();
 ctx.moveTo(0, logicalHeight);
 for(let x=0; x<=logicalWidth; x+=2){
@@ -179,7 +174,6 @@ ctx.lineTo(logicalWidth, logicalHeight);
 ctx.fillStyle = '#2c1e14';
 ctx.fill();
 
-// Linha de grama verde brilhante
 ctx.beginPath();
 for(let x=0; x<=logicalWidth; x+=2){
   if(x===0) ctx.moveTo(x, getTerrainY(x));
@@ -189,7 +183,6 @@ ctx.strokeStyle = '#00ff88';
 ctx.lineWidth = 3;
 ctx.stroke();
 
-// Pedras
 ctx.fillStyle = '#6ab04c';
 rocks.forEach(r => {
   ctx.beginPath();
@@ -216,7 +209,6 @@ ctx.strokeStyle=s.color;ctx.lineWidth=2;
 ctx.beginPath();ctx.arc(cx,s.y+5,5,0,Math.PI*2);ctx.stroke();
 ctx.beginPath();ctx.moveTo(cx,s.y+10);ctx.lineTo(cx,by-10);ctx.stroke();
 
-// Linha da mira
 if(s.isPlayer && !isShooting){
   const rad = s.angle * Math.PI / 180;
   ctx.beginPath();
@@ -283,41 +275,38 @@ updateProjectile();drawWorld();
 requestAnimationFrame(gameLoop);
 }
 
-// MAPEAMENTO COMPATÍVEL COM TECLAS COLORIDAS E CANAL (CH+ / CH-)
+// LÓGICA DE CONTROLOS (NOTEBOOK + TV OCULTA)
 function handleKeyInput(e, isKeyDown) {
   keepTvFocus();
   const code = e.keyCode || e.which;
   const keyName = (e.key || '').toLowerCase();
 
-  // Códigos de TV e Atalhos
-  const VK_RED = 403;
-  const VK_GREEN = 404;
-  const VK_YELLOW = 405;
-  const VK_BLUE = 406;
-
-  // 🔴 VERMELHO -> MOVER ESQUERDA
-  if (code === VK_RED || keyName === 'r' || keyName === 'red') {
+  // 1. MOVER ESQUERDA (Seta Esquerda, Tecla 'A', Tecla Vermelha - 403, VK_LEFT - 37)
+  if (code === 37 || keyName === 'arrowleft' || keyName === 'a' || code === 403 || keyName === 'r' || keyName === 'red') {
     moveDir = isKeyDown ? -1 : 0;
   }
-  // 🟢 VERDE -> MOVER DIREITA
-  if (code === VK_GREEN || keyName === 'g' || keyName === 'green') {
+  
+  // 2. MOVER DIREITA (Seta Direita, Tecla 'D', Tecla Verde - 404, VK_RIGHT - 39)
+  if (code === 39 || keyName === 'arrowright' || keyName === 'd' || code === 404 || keyName === 'g' || keyName === 'green') {
     moveDir = isKeyDown ? 1 : 0;
   }
 
-  // 🟡 AMARELO ou CH+ / PAGE UP -> AUMENTAR MIRA
-  if (code === VK_YELLOW || keyName === 'y' || keyName === 'yellow' || 
-      keyName === 'channelup' || keyName === 'pageup' || code === 33 || code === 427) {
+  // 3. MIRA PARA CIMA (Seta Cima, Tecla 'W', Tecla Amarela - 405, CH+ - 33/427, Tecla '1')
+  if (code === 38 || keyName === 'arrowup' || keyName === 'w' || 
+      code === 405 || keyName === 'y' || keyName === 'yellow' || 
+      keyName === 'channelup' || keyName === 'pageup' || code === 33 || code === 427 || keyName === '1' || code === 49) {
     angleDir = isKeyDown ? 1 : 0;
   }
 
-  // 🔵 AZUL ou CH- / PAGE DOWN -> DIMINUIR MIRA
-  if (code === VK_BLUE || keyName === 'b' || keyName === 'blue' || 
-      keyName === 'channeldown' || keyName === 'pagedown' || code === 34 || code === 428) {
+  // 4. MIRA PARA BAIXO (Seta Baixo, Tecla 'S', Tecla Azul - 406, CH- - 34/428, Tecla '2')
+  if (code === 40 || keyName === 'arrowdown' || keyName === 's' || 
+      code === 406 || keyName === 'b' || keyName === 'blue' || 
+      keyName === 'channeldown' || keyName === 'pagedown' || code === 34 || code === 428 || keyName === '2' || code === 50) {
     angleDir = isKeyDown ? -1 : 0;
   }
 
-  // OK / ENTER -> FORÇA E ATIRAR
-  if (code === 13 || keyName === 'enter' || keyName === 'ok') {
+  // 5. CARREGAR / ATIRAR (Espaço, Enter, OK de TVs - 13)
+  if (code === 13 || code === 32 || keyName === 'enter' || keyName === 'ok' || keyName === ' ') {
     if (isKeyDown) {
       if (!isShooting && !isChargingPower) isChargingPower = true;
     } else {
