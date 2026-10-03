@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha de Palitos</title>
+<title>⚔️ Batalha de Palitos - Design Original</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
@@ -19,34 +19,26 @@ button, input, a { outline: none !important; }
   pointer-events: none;
 }
 
-.health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:44px;z-index:10;flex-shrink:0}
+.health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:40px;z-index:10;flex-shrink:0}
 .player-box{display:flex;align-items:center;gap:8px;flex:1}
 .player-box.right{flex-direction:row-reverse}
-.player-label{color:#fff;font-weight:800;font-size:11px;letter-spacing:1px;text-shadow:0 2px 4px rgba(0,0,0,.5)}
-.health-bar{width:110px;height:12px;background:#0a0812;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
-.health-fill{height:100%;transition:width.4s cubic-bezier(.4,0,.2,1);border-radius:10px}
-.green-fill{background:linear-gradient(90deg,#00ff88,#2ecc71);box-shadow:0 0 10px rgba(46,204,113,.6)}
-.red-fill{background:linear-gradient(90deg,#ff4757,#e74c3c);box-shadow:0 0 10px rgba(231,76,60,.6)}
+.player-label{color:#fff;font-weight:800;font-size:11px;letter-spacing:1px}
+.health-bar{width:110px;height:12px;background:#0a0812;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.2)}
+.health-fill{height:100%;transition:width.4s ease;border-radius:10px}
+.green-fill{background:linear-gradient(90deg,#00ff88,#2ecc71)}
+.red-fill{background:linear-gradient(90deg,#ff4757,#e74c3c)}
 .center-info{text-align:center}
-.vs-text{color:#fff;font-weight:900;font-size:12px;background:linear-gradient(90deg,#f1c40f,#f39c12);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.time-text{color:#f1c40f;font-size:9px;font-weight:600;opacity:.9}
-.turn-line{width:100%;padding:3px;text-align:center;background:linear-gradient(90deg,rgba(241,196,15,.15),rgba(241,196,15,.05));color:#f1c40f;font-weight:700;font-size:10px;letter-spacing:1px;border-bottom:1px solid rgba(241,196,15,.1);flex-shrink:0}
+.vs-text{color:#f1c40f;font-weight:900;font-size:12px}
+
 .canvas-container{flex:1;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;width:100%}
 canvas{width:100%;height:100%;display:block}
-.controls{width:100%;padding:6px 10px;background:rgba(18,13,32,.98);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:60px;flex-shrink:0}
-.pad-group{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);padding:4px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
-.pad-label{color:#888;font-size:9px;font-weight:800;letter-spacing:1px;margin-right:2px}
-.btn-game{background:linear-gradient(180deg,#3a2d5e,#2b1f47);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 12px;font-weight:700;box-shadow:0 3px 6px rgba(0,0,0,.3);transition:transform.1s;font-size:11px;cursor:pointer}
-.btn-fire-direct{width:54px;height:38px;background:linear-gradient(180deg,#ffd32a,#ff6b00);color:#000;font-weight:900;border:none;border-radius:10px;box-shadow:0 0 14px rgba(255,107,0,.5),0 3px 6px rgba(0,0,0,.3);font-size:10px;line-height:1.1;transition:transform.1s;cursor:pointer}
-.modal-overlay{position:absolute;inset:0;background:rgba(5,3,12,.9);backdrop-filter:blur(8px);display:flex;justify-content:center;align-items:center;z-index:100;opacity:0;pointer-events:none;transition:opacity.3s}
-.modal-overlay.active{opacity:1;pointer-events:auto}
-.modal-card{background:linear-gradient(180deg,#241b3f,#1a132e);border:2px solid #f1c40f;border-radius:18px;padding:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 30px rgba(241,196,15,.2);width:290px;display:flex;flex-direction:column;gap:10px}
-.modal-title{font-size:18px;font-weight:900;color:#fff}
-.modal-desc{color:#b8b0d0;font-size:12px}
-.modal-btns{display:flex;gap:8px}
-.btn-modal{background:linear-gradient(180deg,#00d26a,#27ae60);color:#fff;border:none;padding:10px;font-size:12px;font-weight:800;border-radius:8px;cursor:pointer;flex:1}
-.btn-modal.secondary{background:linear-gradient(180deg,#3498db,#2471a3)}
-#powerText{font-size:8px;font-weight:900}
+
+.controls{width:100%;padding:8px 12px;background:rgba(18,13,32,.98);border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;gap:10px;height:65px;flex-shrink:0}
+.pad-group{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);padding:6px 10px;border-radius:10px}
+.pad-label{color:#aaa;font-size:10px;font-weight:800;margin-right:4px}
+.btn-game{background:linear-gradient(180deg,#3a2d5e,#2b1f47);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}
+.btn-fire-direct{width:80px;height:45px;background:linear-gradient(180deg,#ffd32a,#ff6b00);color:#000;font-weight:900;border:none;border-radius:10px;box-shadow:0 0 10px rgba(255,107,0,.4);font-size:11px;line-height:1.1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#powerText{font-size:10px;font-weight:900;margin-top:2px}
 </style>
 </head>
 <body id="gameBody" oncontextmenu="return false;">
@@ -54,263 +46,231 @@ canvas{width:100%;height:100%;display:block}
 <input type="text" id="tvInput" readonly>
 
 <div class="health-top">
-<div class="player-box"><span class="player-label" id="playerTeamLabel">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
-<div class="center-info"><div class="vs-text" id="stageIndicator">⚔️ FASE 1/20</div><div class="time-text" id="timeIndicator">🌙 00:00</div></div>
-<div class="player-box right"><span class="player-label" id="enemyTeamLabel">🤖 ROBO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
+  <div class="player-box"><span class="player-label">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
+  <div class="center-info"><div class="vs-text">⚔️️ BATALHA DE PALITOS</div></div>
+  <div class="player-box right"><span class="player-label">🤖 INIMIGO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
 </div>
-<div class="turn-line" id="turnIndicator">
-SUA VEZ — USE O CONTROLE OU NAVEGADOR
-</div>
+
 <div class="canvas-container" id="canvasContainer">
-<canvas id="gameCanvas"></canvas>
-<div class="modal-overlay" id="gameModal"><div class="modal-card"><div class="modal-title" id="modalTitle">🎉 FASE CONCLUÍDA!</div><div class="modal-desc" id="modalDesc"></div><div class="modal-btns"><button class="btn-modal secondary" id="btnContinue" onclick="nextStage()" tabindex="-1">CONTINUAR</button><button class="btn-modal" onclick="resetGame(true)" tabindex="-1">JOGAR DE NOVO</button></div></div></div>
+  <canvas id="gameCanvas"></canvas>
 </div>
+
 <div class="controls">
-<div class="pad-group">
-<span class="pad-label">MOVER</span>
-<button class="btn-game" id="btnLeft" tabindex="-1">◀</button>
-<button class="btn-game" id="btnRight" tabindex="-1">▶</button>
-</div>
-<div class="pad-group">
-<span class="pad-label">MIRA</span>
-<button class="btn-game" id="btnAngleUp" tabindex="-1">▲</button>
-<button class="btn-game" id="btnAngleDown" tabindex="-1">▼</button>
-</div>
-<div class="pad-group">
-<button class="btn-fire-direct" id="fireBtn" tabindex="-1">🔥<br><span id="powerText">40%</span></button>
-</div>
+  <div class="pad-group">
+    <span class="pad-label">MOVER:</span>
+    <button class="btn-game" tabindex="-1">◀</button>
+    <button class="btn-game" tabindex="-1">▶</button>
+  </div>
+  <div class="pad-group">
+    <span class="pad-label">MIRA:</span>
+    <button class="btn-game" tabindex="-1">▲</button>
+    <button class="btn-game" tabindex="-1">▼</button>
+  </div>
+  <div class="pad-group">
+    <button class="btn-fire-direct" tabindex="-1">🔥 ATIRAR<br><span id="powerText">40%</span></button>
+  </div>
 </div>
 
 <script>
-const AudioFX={ctx:null,init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume();},playShoot(){this.init();const n=this.ctx.currentTime,o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(300,n);o.frequency.exponentialRampToValueAtTime(40,n+.25);g.gain.setValueAtTime(.8,n);g.gain.exponentialRampToValueAtTime(.01,n+.25);o.connect(g);g.connect(this.ctx.destination);o.start(n);o.stop(n+.25);},playExplosion(){this.init();const n=this.ctx.currentTime,s=this.ctx.sampleRate*.5,b=this.ctx.createBuffer(1,s,this.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<s;i++)d[i]=Math.random()*2-1;const w=this.ctx.createBufferSource();w.buffer=b;const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(800,n);f.frequency.exponentialRampToValueAtTime(30,n+.5);const g=this.ctx.createGain();g.gain.setValueAtTime(1,n);g.gain.exponentialRampToValueAtTime(.01,n+.5);w.connect(f);f.connect(g);g.connect(this.ctx.destination);w.start(n);w.stop(n+.5);}};
-const canvas=document.getElementById('gameCanvas');const container=document.getElementById('canvasContainer');const ctx=canvas.getContext('2d');
-let dpr=window.devicePixelRatio||1,logicalWidth=0,logicalHeight=0,currentStage=1;const maxStages=20;let matchTime=0;
+const canvas = document.getElementById('gameCanvas');
+const container = document.getElementById('canvasContainer');
+const ctx = canvas.getContext('2d');
+let dpr = window.devicePixelRatio || 1, logicalWidth = 0, logicalHeight = 0;
 
 function keepTvFocus(){
-  const input=document.getElementById('tvInput');
-  if(input&&document.activeElement!==input){
-    input.focus();
-  }
+  const input = document.getElementById('tvInput');
+  if(input && document.activeElement !== input) input.focus();
 }
-setInterval(keepTvFocus,300);
+setInterval(keepTvFocus, 300);
 
 function resizeCanvas(){
-dpr=window.devicePixelRatio||1;
-logicalWidth=container.clientWidth;
-logicalHeight=container.clientHeight;
-canvas.width=logicalWidth*dpr;
-canvas.height=logicalHeight*dpr;
-ctx.resetTransform();
-ctx.scale(dpr,dpr);
-if(!terrainHeights||terrainHeights.length===0)initStage();
+  dpr = window.devicePixelRatio || 1;
+  logicalWidth = container.clientWidth;
+  logicalHeight = container.clientHeight;
+  canvas.width = logicalWidth * dpr;
+  canvas.height = logicalHeight * dpr;
+  ctx.resetTransform();
+  ctx.scale(dpr, dpr);
+  if(!terrainHeights || terrainHeights.length === 0) initStage();
 }
-window.addEventListener('resize',resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
 
-let terrainHeights=[],rocks=[],tanks=[],effects=[],peakXsCache=[];
-const weapons=[{name:'Normal',symbol:'⚫',speed:.12,damage:35,radius:22,gravity:.22,color:'#ffcc00'}];
+let terrainHeights = [], stickmen = [], projectile = null;
+let currentTurn = 0, isShooting = false, moveDir = 0, angleDir = 0, isChargingPower = false;
 
 function initStage(){
-const b=logicalHeight*.68;
-terrainHeights=new Float32Array(Math.ceil(logicalWidth)+1);
-for(let x=0;x<=logicalWidth;x++){
-terrainHeights[x]=b+Math.sin(x*0.02)*15+Math.cos(x*0.008)*20;
-}
-rocks=[];
-for(let i=0;i<12;i++){
-rocks.push({x:Math.random()*logicalWidth,y:0,size:3+Math.random()*4});
-rocks[i].y=terrainHeights[Math.floor(rocks[i].x)]||b;
-}
+  const b = logicalHeight * 0.7;
+  terrainHeights = new Float32Array(Math.ceil(logicalWidth) + 1);
+  for(let x = 0; x <= logicalWidth; x++){
+    terrainHeights[x] = b + Math.sin(x * 0.015) * 20 + Math.cos(x * 0.008) * 15;
+  }
 
-tanks=[
-{id:0,team:'green',isPlayer:true,x:30,y:0,width:20,height:28,angle:45,power:40,health:100,color:'#2ecc71',facing:1},
-{id:4,team:'red',isPlayer:false,x:logicalWidth-50,y:0,width:20,height:28,angle:45,power:40,health:100,color:'#e74c3c',facing:-1}
-];
-tanks.forEach(t=>updateTankY(t));
-currentTankIndex=0;effects=[];matchTime=0;
-keepTvFocus();
+  stickmen = [
+    { id: 0, isPlayer: true, x: 50, y: 0, angle: 45, power: 40, health: 100, color: '#2ecc71', facing: 1 },
+    { id: 1, isPlayer: false, x: logicalWidth - 70, y: 0, angle: 45, power: 40, health: 100, color: '#e74c3c', facing: -1 }
+  ];
+  stickmen.forEach(s => updateY(s));
 }
 
-function getTerrainY(x){const i=Math.floor(x);if(i<0)return terrainHeights[0]||logicalHeight*.68;if(i>=logicalWidth)return terrainHeights[Math.floor(logicalWidth)]||logicalHeight*.68;return terrainHeights[i];}
-function updateTankY(t){t.y=getTerrainY(t.x+t.width/2)-t.height;}
+function getTerrainY(x){
+  const i = Math.floor(x);
+  if(i < 0) return terrainHeights[0] || logicalHeight * 0.7;
+  if(i >= logicalWidth) return terrainHeights[Math.floor(logicalWidth)] || logicalHeight * 0.7;
+  return terrainHeights[i];
+}
 
-let currentTankIndex=0,isShooting=false,projectile=null,moveDir=0,angleDir=0,isChargingPower=false;
+function updateY(s){ s.y = getTerrainY(s.x) - 25; }
 
 function fireProjectile(){
-if(isShooting)return;
-isShooting=true;AudioFX.playShoot();
-let t=tanks[currentTankIndex];
-const rad = t.angle * Math.PI / 180;
-const pm = .5 + (t.power / 100) * 2.2;
-const bs = weapons[0].speed * pm * (logicalWidth / 12);
-const hx = t.x + t.width / 2;
-const sy = t.y + 10;
-
-projectile={x:hx+Math.cos(rad)*22*t.facing,y:sy-Math.sin(rad)*22,vx:Math.cos(rad)*bs*t.facing,vy:-Math.sin(rad)*bs,radius:3,gravity:.22,damage:35,color:'#ffcc00',shooterId:t.id};
+  if(isShooting) return;
+  isShooting = true;
+  let s = stickmen[currentTurn];
+  const rad = s.angle * Math.PI / 180;
+  const speed = 3 + (s.power / 100) * 10;
+  
+  projectile = {
+    x: s.x,
+    y: s.y,
+    vx: Math.cos(rad) * speed * s.facing,
+    vy: -Math.sin(rad) * speed,
+    gravity: 0.2
+  };
 }
 
 function drawBackground(){
-let grad = ctx.createLinearGradient(0,0,0,logicalHeight);
-grad.addColorStop(0, '#150a21');
-grad.addColorStop(0.5, '#4a154b');
-grad.addColorStop(1, '#8c245c');
-ctx.fillStyle = grad;
-ctx.fillRect(0,0,logicalWidth,logicalHeight);
+  // Fundo original roxo/crepúsculo
+  let grad = ctx.createLinearGradient(0, 0, 0, logicalHeight);
+  grad.addColorStop(0, '#150a21');
+  grad.addColorStop(0.5, '#4a154b');
+  grad.addColorStop(1, '#8c245c');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-ctx.fillStyle = 'rgba(40, 15, 55, 0.6)';
-ctx.beginPath();
-ctx.moveTo(0, logicalHeight);
-for(let x=0; x<=logicalWidth; x+=10){
-  ctx.lineTo(x, logicalHeight*0.45 + Math.sin(x*0.005)*50);
-}
-ctx.lineTo(logicalWidth, logicalHeight);
-ctx.fill();
-
-ctx.beginPath();
-ctx.moveTo(0, logicalHeight);
-for(let x=0; x<=logicalWidth; x+=2){
-  ctx.lineTo(x, getTerrainY(x));
-}
-ctx.lineTo(logicalWidth, logicalHeight);
-ctx.fillStyle = '#2c1e14';
-ctx.fill();
-
-ctx.beginPath();
-for(let x=0; x<=logicalWidth; x+=2){
-  if(x===0) ctx.moveTo(x, getTerrainY(x));
-  else ctx.lineTo(x, getTerrainY(x));
-}
-ctx.strokeStyle = '#00ff88';
-ctx.lineWidth = 3;
-ctx.stroke();
-
-ctx.fillStyle = '#6ab04c';
-rocks.forEach(r => {
+  // Montanhas de fundo
+  ctx.fillStyle = 'rgba(40, 15, 55, 0.6)';
   ctx.beginPath();
-  ctx.arc(r.x, r.y - 2, r.size, 0, Math.PI*2);
+  ctx.moveTo(0, logicalHeight);
+  for(let x = 0; x <= logicalWidth; x += 10){
+    ctx.lineTo(x, logicalHeight * 0.5 + Math.sin(x * 0.005) * 40);
+  }
+  ctx.lineTo(logicalWidth, logicalHeight);
   ctx.fill();
-});
-}
 
-function drawWorld(){
-drawBackground();
-tanks.forEach(t=>drawStickman(t));
+  // Terreno e linha verde cintilante
+  ctx.beginPath();
+  ctx.moveTo(0, logicalHeight);
+  for(let x = 0; x <= logicalWidth; x += 2){
+    ctx.lineTo(x, getTerrainY(x));
+  }
+  ctx.lineTo(logicalWidth, logicalHeight);
+  ctx.fillStyle = '#2c1e14';
+  ctx.fill();
 
-if(projectile){
-ctx.beginPath();ctx.arc(projectile.x,projectile.y,4,0,Math.PI*2);
-ctx.fillStyle='#ffcc00';ctx.fill();
-}
+  ctx.beginPath();
+  for(let x = 0; x <= logicalWidth; x += 2){
+    if(x === 0) ctx.moveTo(x, getTerrainY(x));
+    else ctx.lineTo(x, getTerrainY(x));
+  }
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 3;
+  ctx.stroke();
 }
 
 function drawStickman(s){
-if(s.health<=0)return;
-ctx.save();
-const cx=s.x+s.width/2,by=s.y+s.height;
-ctx.strokeStyle=s.color;ctx.lineWidth=2;
-ctx.beginPath();ctx.arc(cx,s.y+5,5,0,Math.PI*2);ctx.stroke();
-ctx.beginPath();ctx.moveTo(cx,s.y+10);ctx.lineTo(cx,by-10);ctx.stroke();
-
-if(s.isPlayer && !isShooting){
-  const rad = s.angle * Math.PI / 180;
-  ctx.beginPath();
-  ctx.moveTo(cx, s.y+10);
-  ctx.lineTo(cx + Math.cos(rad)*25*s.facing, s.y+10 - Math.sin(rad)*25);
-  ctx.strokeStyle = '#f1c40f';
+  if(s.health <= 0) return;
+  ctx.save();
+  ctx.strokeStyle = s.color;
   ctx.lineWidth = 2;
-  ctx.stroke();
-}
-ctx.restore();
+
+  // Cabeça e Corpo de Palito
+  ctx.beginPath(); ctx.arc(s.x, s.y, 6, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x, s.y + 6); ctx.lineTo(s.x, s.y + 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x, s.y + 20); ctx.lineTo(s.x - 5, s.y + 28); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x, s.y + 20); ctx.lineTo(s.x + 5, s.y + 28); ctx.stroke();
+
+  // Linha Amarela de Mira
+  if(s.isPlayer && !isShooting){
+    const rad = s.angle * Math.PI / 180;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y + 10);
+    ctx.lineTo(s.x + Math.cos(rad) * 30 * s.facing, s.y + 10 - Math.sin(rad) * 30);
+    ctx.strokeStyle = '#f1c40f';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
-function updateProjectile(){
-if(!projectile)return;
-projectile.vy+=projectile.gravity;
-projectile.x+=projectile.vx;
-projectile.y+=projectile.vy;
+function updateGame(delta){
+  const s = stickmen[currentTurn];
+  if(s && s.isPlayer && !isShooting){
+    if(moveDir !== 0){
+      s.x = Math.max(15, Math.min(logicalWidth - 15, s.x + moveDir * 1.5));
+      updateY(s);
+    }
+    if(angleDir !== 0){
+      s.angle = Math.max(0, Math.min(85, s.angle + angleDir * 1.2));
+    }
+    if(isChargingPower){
+      s.power = (s.power + 1) % 100;
+      document.getElementById('powerText').textContent = `${Math.floor(s.power)}%`;
+    }
+  }
 
-if(projectile.y>=getTerrainY(projectile.x)){
-projectile=null;
-isShooting=false;
-nextTurn();
-}
-}
+  if(projectile){
+    projectile.vy += projectile.gravity;
+    projectile.x += projectile.vx;
+    projectile.y += projectile.vy;
 
-function nextTurn(){
-currentTankIndex=(currentTankIndex+1)%tanks.length;
-const a=tanks[currentTankIndex];
-if(!a.isPlayer){
-setTimeout(()=>{
-a.angle=35+Math.random()*30;
-a.power=30+Math.random()*40;
-fireProjectile();
-},800);
-}
-keepTvFocus();
-}
-
-function processControls(delta){
-const factor = delta / 16.66;
-const a=tanks[currentTankIndex];
-if(a&&a.isPlayer&&!isShooting){
-if(moveDir!==0){
-a.x=Math.max(10,Math.min(logicalWidth-25,a.x+moveDir*1.2*factor));
-updateTankY(a);
-}
-if(angleDir!==0){
-a.angle=Math.max(0,Math.min(85,a.angle+angleDir*1.0*factor));
-}
-if(isChargingPower){
-a.power=(a.power+0.8*factor)%100;
-document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
-}
-}
+    if(projectile.y >= getTerrainY(projectile.x)){
+      projectile = null;
+      isShooting = false;
+      currentTurn = (currentTurn + 1) % stickmen.length;
+      if(!stickmen[currentTurn].isPlayer){
+        setTimeout(() => {
+          stickmen[1].angle = 30 + Math.random() * 30;
+          stickmen[1].power = 30 + Math.random() * 40;
+          fireProjectile();
+        }, 800);
+      }
+    }
+  }
 }
 
-let lastFrameTime = performance.now();
-function gameLoop(now){
-const delta = Math.min(now - lastFrameTime, 50);
-lastFrameTime = now;
-processControls(delta);
-ctx.clearRect(0,0,logicalWidth,logicalHeight);
-updateProjectile();drawWorld();
-requestAnimationFrame(gameLoop);
+function gameLoop(){
+  updateGame();
+  ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+  drawBackground();
+  stickmen.forEach(s => drawStickman(s));
+
+  if(projectile){
+    ctx.beginPath();
+    ctx.arc(projectile.x, projectile.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffcc00';
+    ctx.fill();
+  }
+  requestAnimationFrame(gameLoop);
 }
 
-// LÓGICA DE CONTROLOS (NOTEBOOK + TV OCULTA)
-function handleKeyInput(e, isKeyDown) {
+function handleKey(e, isDown){
   keepTvFocus();
   const code = e.keyCode || e.which;
-  const keyName = (e.key || '').toLowerCase();
+  const key = (e.key || '').toLowerCase();
 
-  // 1. MOVER ESQUERDA (Seta Esquerda, Tecla 'A', Tecla Vermelha - 403, VK_LEFT - 37)
-  if (code === 37 || keyName === 'arrowleft' || keyName === 'a' || code === 403 || keyName === 'r' || keyName === 'red') {
-    moveDir = isKeyDown ? -1 : 0;
-  }
-  
-  // 2. MOVER DIREITA (Seta Direita, Tecla 'D', Tecla Verde - 404, VK_RIGHT - 39)
-  if (code === 39 || keyName === 'arrowright' || keyName === 'd' || code === 404 || keyName === 'g' || keyName === 'green') {
-    moveDir = isKeyDown ? 1 : 0;
-  }
+  // Movimento: Setas, A/D, Teclas Coloridas
+  if(code === 37 || key === 'a' || code === 403 || key === 'r') moveDir = isDown ? -1 : 0;
+  if(code === 39 || key === 'd' || code === 404 || key === 'g') moveDir = isDown ? 1 : 0;
 
-  // 3. MIRA PARA CIMA (Seta Cima, Tecla 'W', Tecla Amarela - 405, CH+ - 33/427, Tecla '1')
-  if (code === 38 || keyName === 'arrowup' || keyName === 'w' || 
-      code === 405 || keyName === 'y' || keyName === 'yellow' || 
-      keyName === 'channelup' || keyName === 'pageup' || code === 33 || code === 427 || keyName === '1' || code === 49) {
-    angleDir = isKeyDown ? 1 : 0;
-  }
+  // Mira: Setas, W/S, CH+/CH- (33/34), Teclas 1/2
+  if(code === 38 || key === 'w' || code === 405 || key === 'y' || code === 33 || code === 427 || key === '1') angleDir = isDown ? 1 : 0;
+  if(code === 40 || key === 's' || code === 406 || key === 'b' || code === 34 || code === 428 || key === '2') angleDir = isDown ? -1 : 0;
 
-  // 4. MIRA PARA BAIXO (Seta Baixo, Tecla 'S', Tecla Azul - 406, CH- - 34/428, Tecla '2')
-  if (code === 40 || keyName === 'arrowdown' || keyName === 's' || 
-      code === 406 || keyName === 'b' || keyName === 'blue' || 
-      keyName === 'channeldown' || keyName === 'pagedown' || code === 34 || code === 428 || keyName === '2' || code === 50) {
-    angleDir = isKeyDown ? -1 : 0;
-  }
-
-  // 5. CARREGAR / ATIRAR (Espaço, Enter, OK de TVs - 13)
-  if (code === 13 || code === 32 || keyName === 'enter' || keyName === 'ok' || keyName === ' ') {
-    if (isKeyDown) {
-      if (!isShooting && !isChargingPower) isChargingPower = true;
+  // Disparo: OK / ENTER / ESPAÇO
+  if(code === 13 || code === 32 || key === 'enter' || key === 'ok' || key === ' ') {
+    if(isDown){
+      if(!isShooting && !isChargingPower) isChargingPower = true;
     } else {
-      if (isChargingPower) {
+      if(isChargingPower){
         isChargingPower = false;
         fireProjectile();
       }
@@ -318,11 +278,12 @@ function handleKeyInput(e, isKeyDown) {
   }
 }
 
-window.addEventListener('keydown', e => handleKeyInput(e, true));
-window.addEventListener('keyup', e => handleKeyInput(e, false));
+window.addEventListener('keydown', e => handleKey(e, true));
+window.addEventListener('keyup', e => handleKey(e, false));
 
-resizeCanvas();initStage();
-requestAnimationFrame(gameLoop);
+resizeCanvas();
+initStage();
+gameLoop();
 </script>
 </body>
 </html>
