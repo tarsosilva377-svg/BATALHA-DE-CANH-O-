@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha de Palitos - IA Estratégica Smart TV</title>
+<title>⚔️ Batalha de Palitos - IA Estratégica Smart TV & PC</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
@@ -65,14 +65,14 @@ canvas{width:100%;height:100%;display:block}
 <div class="center-info"><div class="vs-text" id="stageIndicator">⚔️ FASE 1/20</div><div class="time-text" id="timeIndicator">🌙 00:00</div></div>
 <div class="player-box right"><span class="player-label" id="enemyTeamLabel">🤖 ROBO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
 </div>
-<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — (🔴 🟢 🟡 🔵 / NÚMERO 5)</div>
+<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — [🛈 Mover: ◀ ▶ | Mira: 🔼 🔽 | Força: A/S | Atirar: ESPAÇO]</div>
 <div class="canvas-container" id="canvasContainer">
 <div class="ai-ammo-indicator" id="aiAmmoIndicator">🤖 IA equipou: ⚫</div>
 <canvas id="gameCanvas"></canvas>
 <div class="modal-overlay" id="gameModal"><div class="modal-card"><div class="modal-title" id="modalTitle">🎉 FASE CONCLUÍDA!</div><div class="modal-desc" id="modalDesc"></div><div class="modal-btns"><button class="btn-modal secondary" id="btnContinue" onclick="nextStage()">CONTINUAR</button><button class="btn-modal" onclick="resetGame(true)">JOGAR DE NOVO</button></div></div></div>
 </div>
 <div class="controls">
-<div class="pad-group"><span class="pad-label">MOV</span><button class="btn-game btn-move" id="moveLeftBtn" tabindex="-1">◀</button><button class="btn-game btn-aim" id="forceMinusBtn" tabindex="-1">➖</button><button class="btn-fire-direct" id="fireBtn" tabindex="-1">🔥<br><span id="powerText">0%</span></button><button class="btn-game btn-aim" id="forcePlusBtn" tabindex="-1">➕</button><button class="btn-game btn-move" id="moveRightBtn" tabindex="-1">▶</button></div>
+<div class="pad-group"><span class="pad-label">MOV</span><button class="btn-game btn-move" id="moveLeftBtn" tabindex="-1">◀</button><button class="btn-game btn-aim" id="forceMinusBtn" tabindex="-1">➖(S)</button><button class="btn-fire-direct" id="fireBtn" tabindex="-1">🔥<br><span id="powerText">0%</span></button><button class="btn-game btn-aim" id="forcePlusBtn" tabindex="-1">➕(A)</button><button class="btn-game btn-move" id="moveRightBtn" tabindex="-1">▶</button></div>
 <div class="pad-group"><span class="pad-label">MIRA</span><button class="btn-game btn-aim" id="anglePlusBtn" tabindex="-1">🔼</button><button class="btn-game btn-aim" id="angleMinusBtn" tabindex="-1">🔽</button><button class="ammo-btn active" data-weapon="0" tabindex="-1">⚫</button><button class="ammo-btn" data-weapon="1" tabindex="-1">💣</button></div>
 </div>
 
@@ -512,12 +512,6 @@ function updateProjectile(){
     projectile=null;
     isShooting=false;
 
-    const playerTank = tanks.find(t=>t.isPlayer);
-    if(playerTank) {
-      playerTank.power = 0;
-      document.getElementById('powerText').textContent = `0%`;
-    }
-
     if(!checkWin())nextTurn();
   }
 }
@@ -526,7 +520,7 @@ function nextTurn(){
   do{currentTankIndex=(currentTankIndex+1)%tanks.length;}while(tanks[currentTankIndex].health<=0);
   const a=tanks[currentTankIndex];
   if(a.isPlayer){
-    document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — (🔴 🟢 🟡 🔵 / 5)';
+    document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — [🛈 Mover: ◀ ▶ | Mira: 🔼 🔽 | Força: A/S | Atirar: ESPAÇO]';
     document.getElementById('aiAmmoIndicator').style.display='none';
     document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
   }else if(a.team==='green'){
@@ -694,14 +688,14 @@ function nextStage(){
   if(currentStage<maxStages)currentStage++;
   document.getElementById('gameModal').classList.remove('active');
   initStage();updateHealthBars();isShooting=false;projectile=null;
-  document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — (🔴 🟢 🟡 🔵 / 5)';
+  document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — [🛈 Mover: ◀ ▶ | Mira: 🔼 🔽 | Força: A/S | Atirar: ESPAÇO]';
 }
 
 function resetGame(fr=false){
   if(fr){currentStage=1;for(let k in aiGlobalBrain.redTanks)delete aiGlobalBrain.redTanks[k];aiGlobalBrain.successfulShotsMemory=[];}
   document.getElementById('gameModal').classList.remove('active');
   initStage();updateHealthBars();isShooting=false;projectile=null;
-  document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — (🔴 🟢 🟡 🔵 / 5)';
+  document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — [🛈 Mover: ◀ ▶ | Mira: 🔼 🔽 | Força: A/S | Atirar: ESPAÇO]';
 }
 
 function processControls(){
@@ -720,20 +714,8 @@ function processControls(){
     }
 
     if(forceDir!==0){
-      a.power=Math.max(0,Math.min(100,a.power+forceDir*.6));
+      a.power=Math.max(0,Math.min(100,a.power+forceDir*.8));
       document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
-    }
-
-    if(isChargingPower){
-      a.power += 1.5;
-      if(a.power >= 100){
-        a.power = 100;
-        document.getElementById('powerText').textContent = `100%`;
-        isChargingPower = false;
-        fireProjectile();
-      } else {
-        document.getElementById('powerText').textContent = `${Math.floor(a.power)}%`;
-      }
     }
   }
 }
@@ -753,7 +735,7 @@ function handleKey(e, isDown){
 
   const a = tanks[currentTankIndex];
 
-  // Alternar Munições (Teclas 1 e 2)
+  // Alternar Munições (Teclas 1 e 2 do teclado principal ou teclado numérico)
   if(code === 49 || key === '1' || eCode === 'Digit1'){
     if(e.preventDefault) e.preventDefault();
     selectWeapon(0);
@@ -765,60 +747,52 @@ function handleKey(e, isDown){
     return;
   }
 
-  // Ajuste fino de Força (Teclas 3 e 4)
-  if(code === 51 || key === '3' || eCode === 'Digit3'){
-    if(e.preventDefault) e.preventDefault();
-    forceDir = isDown ? -1 : 0;
-    return;
-  }
-  if(code === 52 || key === '4' || eCode === 'Digit4'){
-    if(e.preventDefault) e.preventDefault();
-    forceDir = isDown ? 1 : 0;
-    return;
-  }
-
-  const isButtonFive = (code === 53 || code === 101 || key === '5' || eCode === 'Digit5' || eCode === 'Numpad5');
-
-  // Vermelho (🔴) / Seta Esquerda / 'A' -> Mover Esquerda
-  if(code === 403 || key === 'r' || code === 37 || key === 'a') {
+  // MOVIMENTO: Seta Esquerda (Move para trás) e Seta Direita (Move para frente)
+  if(code === 37 || key === 'arrowleft') {
     if(e.preventDefault) e.preventDefault();
     moveDir = isDown ? -1 : 0;
   }
-
-  // Verde (🟢) / Seta Direita / 'D' -> Mover Direita
-  if(code === 404 || key === 'g' || code === 39 || key === 'd') {
+  if(code === 39 || key === 'arrowright') {
     if(e.preventDefault) e.preventDefault();
     moveDir = isDown ? 1 : 0;
   }
 
-  // Amarelo (🟡) / Seta Cima / 'W' -> Mira Cima
-  if(code === 405 || key === 'y' || code === 38 || key === 'w') {
+  // MIRA: Seta Para Cima (Aumenta Ângulo) e Seta Para Baixo (Diminui Ângulo)
+  if(code === 38 || key === 'arrowup') {
     if(e.preventDefault) e.preventDefault();
     angleDir = isDown ? 1 : 0;
   }
-
-  // Azul (🔵) / Seta Baixo / 'S' -> Mira Baixo
-  if(code === 406 || key === 'b' || code === 40 || key === 's') {
+  if(code === 40 || key === 'arrowdown') {
     if(e.preventDefault) e.preventDefault();
     angleDir = isDown ? -1 : 0;
   }
 
-  // Botão 5 ou OK -> Atirar / Carregar Força
-  if(isButtonFive || code === 13 || code === 32 || key === ' ') {
+  // FORÇA DO DISPARO: 'A' (Aumenta) e 'S' (Diminui)
+  if(key === 'a' || code === 65) {
     if(e.preventDefault) e.preventDefault();
-    if(a && a.isPlayer && !isShooting){
-      if(isDown){
-        if(!isChargingPower) {
-          a.power = 0;
-          isChargingPower = true;
-        }
-      } else {
-        if(isChargingPower){
-          isChargingPower = false;
-          fireProjectile();
-        }
-      }
+    forceDir = isDown ? 1 : 0;
+  }
+  if(key === 's' || code === 83) {
+    if(e.preventDefault) e.preventDefault();
+    forceDir = isDown ? -1 : 0;
+  }
+
+  // DISPARO: Barra de Espaço
+  if(code === 32 || key === ' ' || key === 'spacebar') {
+    if(e.preventDefault) e.preventDefault();
+    if(a && a.isPlayer && !isShooting && isDown){
+      fireProjectile();
     }
+  }
+
+  // Compatibilidade Mantida para Controle Smart TV (Botões Coloridos & Número 5)
+  if(code === 403 || key === 'r') moveDir = isDown ? -1 : 0;
+  if(code === 404 || key === 'g') moveDir = isDown ? 1 : 0;
+  if(code === 405 || key === 'y') angleDir = isDown ? 1 : 0;
+  if(code === 406 || key === 'b') angleDir = isDown ? -1 : 0;
+  if(code === 53 || code === 101 || key === '5' || eCode === 'Digit5'){
+    if(e.preventDefault) e.preventDefault();
+    if(a && a.isPlayer && !isShooting && isDown) fireProjectile();
   }
 }
 
@@ -841,17 +815,7 @@ setupContinuousButton(document.getElementById('angleMinusBtn'),()=>angleDir=-1,(
 document.getElementById('fireBtn').addEventListener('pointerdown',e=>{
   e.preventDefault();
   const a=tanks[currentTankIndex];
-  if(a&&a.isPlayer&&!isShooting) {
-    a.power = 0;
-    isChargingPower = true;
-  }
-});
-document.getElementById('fireBtn').addEventListener('pointerup',e=>{
-  e.preventDefault();
-  if(isChargingPower){
-    isChargingPower = false;
-    fireProjectile();
-  }
+  if(a&&a.isPlayer&&!isShooting) fireProjectile();
 });
 
 document.querySelectorAll('.ammo-btn').forEach(b=>{
