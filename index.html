@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha de Palitos - IA Estratégica</title>
+<title>⚔️ Batalha de Palitos - TV Toshiba VIDAA</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-/* Impede que o cursor/foco da TV selecione botões visuais */
+html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
 button, input, a { outline: none !important; }
 .health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:44px;z-index:10;flex-shrink:0}
 .player-box{display:flex;align-items:center;gap:8px;flex:1}
@@ -46,13 +45,13 @@ canvas{width:100%;height:100%;display:block}
 #powerText{font-size:8px;font-weight:900}
 </style>
 </head>
-<body oncontextmenu="return false;" tabindex="0">
+<body id="gameBody" oncontextmenu="return false;" tabindex="0" autofocus>
 <div class="health-top">
 <div class="player-box"><span class="player-label" id="playerTeamLabel">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
 <div class="center-info"><div class="vs-text" id="stageIndicator">⚔️ FASE 1/20</div><div class="time-text" id="timeIndicator">🌙 00:00</div></div>
 <div class="player-box right"><span class="player-label" id="enemyTeamLabel">🤖 ROBO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
 </div>
-<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO</div>
+<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO</div>
 <div class="canvas-container" id="canvasContainer">
 <div class="ai-ammo-indicator" id="aiAmmoIndicator">🤖 IA equipou: ⚫</div>
 <canvas id="gameCanvas"></canvas>
@@ -68,6 +67,13 @@ const canvas=document.getElementById('gameCanvas');const container=document.getE
 let dpr=window.devicePixelRatio||1,logicalWidth=0,logicalHeight=0,currentStage=1;const maxStages=20;let matchTime=0;const totalDayDuration=90;
 const aiGlobalBrain={redTanks:{},successfulShotsMemory:[]};
 function getOrCreateAiBrain(id){if(!aiGlobalBrain.redTanks[id])aiGlobalBrain.redTanks[id]={powerCorrection:0,angleCorrection:0,score:0,shotsCount:0,lastShotInfo:null,wasHitLastTurn:false};return aiGlobalBrain.redTanks[id];}
+
+function keepFocusOnBody() {
+  const b = document.getElementById('gameBody');
+  if (b && document.activeElement !== b) {
+    b.focus();
+  }
+}
 
 function resizeCanvas(){
 dpr=window.devicePixelRatio||1;
@@ -120,8 +126,8 @@ tanks.push({id:4,team:'red',isPlayer:false,x:logicalWidth-50,y:0,width:20,height
 document.getElementById('playerTeamLabel').textContent='🟢 VOCÊ';document.getElementById('enemyTeamLabel').textContent='🤖 ROBO';
 }
 tanks.forEach(t=>updateTankY(t));currentTankIndex=0;effects=[];matchTime=0;
-document.getElementById('stageIndicator').textContent=`⚔️ FASE ${currentStage}/${maxStages}`;
-if (document.activeElement) document.activeElement.blur();
+document.getElementById('stageIndicator').textContent=`⚔️️ FASE ${currentStage}/${maxStages}`;
+keepFocusOnBody();
 }
 
 function getTerrainY(x){const i=Math.floor(x);if(i<0)return terrainHeights[0]||logicalHeight*.68;if(i>=logicalWidth)return terrainHeights[Math.floor(logicalWidth)]||logicalHeight*.68;return terrainHeights[i];}
@@ -425,7 +431,7 @@ function nextTurn(){
 do{currentTankIndex=(currentTankIndex+1)%tanks.length;}while(tanks[currentTankIndex].health<=0);
 const a=tanks[currentTankIndex];
 if(a.isPlayer){
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO';
 document.getElementById('aiAmmoIndicator').style.display='none';
 document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
 }else if(a.team==='green'){
@@ -446,7 +452,7 @@ a.targetX=a.x;
 setTimeout(()=>executeAIShot(a),500);
 }
 }
-if (document.activeElement) document.activeElement.blur();
+keepFocusOnBody();
 }
 
 function simulateShot(shooter, ad, pv, wo) {
@@ -591,17 +597,17 @@ document.getElementById('gameModal').classList.add('active');
 function nextStage(){
 if(currentStage<maxStages)currentStage++;
 document.getElementById('gameModal').classList.remove('active');
-if (document.activeElement) document.activeElement.blur();
+keepFocusOnBody();
 initStage();updateHealthBars();isShooting=false;projectile=null;
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO';
 }
 
 function resetGame(fr=false){
 if(fr){currentStage=1;for(let k in aiGlobalBrain.redTanks)delete aiGlobalBrain.redTanks[k];aiGlobalBrain.successfulShotsMemory=[];}
 document.getElementById('gameModal').classList.remove('active');
-if (document.activeElement) document.activeElement.blur();
+keepFocusOnBody();
 initStage();updateHealthBars();isShooting=false;projectile=null;
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO';
 }
 
 function processControls(){
@@ -619,10 +625,9 @@ a.angle+=angleDir*.8;
 a.angle=Math.max(0,Math.min(85,a.angle));
 }
 
-// Aumenta a força enquanto o botão do controle ou tecla estiver pressionado
 if(isChargingPower){
-a.power += 0.7;
-if(a.power > 100) a.power = 10; // Reinicia se passar de 100%
+a.power += 0.8;
+if(a.power > 100) a.power = 10;
 document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
 }
 }
@@ -635,86 +640,66 @@ updateProjectile();drawWorld();
 requestAnimationFrame(gameLoop);
 }
 
-function setupContinuousButton(e,s,en){
-e.addEventListener('pointerdown',ev=>{ev.preventDefault();s();});
-e.addEventListener('pointerup',ev=>{if(ev)ev.preventDefault();en();});
-e.addEventListener('pointerleave',ev=>{if(ev)ev.preventDefault();en();});
-}
+function handleKeyInput(e, isKeyDown) {
+  keepFocusOnBody();
 
-setupContinuousButton(document.getElementById('moveLeftBtn'),()=>moveDir=-1,()=>moveDir=0);
-setupContinuousButton(document.getElementById('moveRightBtn'),()=>moveDir=1,()=>moveDir=0);
-setupContinuousButton(document.getElementById('forceMinusBtn'),()=>forceDir=-1,()=>forceDir=0);
-setupContinuousButton(document.getElementById('forcePlusBtn'),()=>forceDir=1,()=>forceDir=0);
-setupContinuousButton(document.getElementById('anglePlusBtn'),()=>angleDir=1,()=>angleDir=0);
-setupContinuousButton(document.getElementById('angleMinusBtn'),()=>angleDir=-1,()=>angleDir=0);
+  const k = e.key || e.keyCode;
+  const keyStr = String(k).toUpperCase();
 
-document.getElementById('fireBtn').addEventListener('pointerdown',e=>{
-e.preventDefault();
-const a=tanks[currentTankIndex];
-if(a&&a.isPlayer&&!isShooting)fireProjectile();
-});
-
-document.querySelectorAll('.ammo-btn').forEach(b=>{
-b.addEventListener('click',()=>{
-const a=tanks[currentTankIndex];
-if(a&&a.isPlayer){
-selectedWeapon=Number(b.dataset.weapon);
-document.querySelectorAll('.ammo-btn').forEach((x,i)=>x.classList.toggle('active',i===selectedWeapon));
-}
-});
-});
-
-// Suporte universal aos comandos do controle remoto da TV e teclado
-window.addEventListener('keydown', e => {
-  // Impede que o navegador da TV mova a página ou selecione botões visuais
-  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' ', 'Select', 'OK', '13', '37', '38', '39', '40'].includes(e.key) || ['Left', 'Right', 'Up', 'Down'].includes(e.key)) {
-    e.preventDefault();
+  // Intercepta e desativa ações nativas de navegação na TV
+  if (['ARROWLEFT', 'ARROWRIGHT', 'ARROWUP', 'ARROWDOWN', 'ENTER', ' ', 'SELECT', 'OK', '13', '37', '38', '39', '40', '29443', 'VK_OK'].includes(keyStr)) {
+    if (e.preventDefault) e.preventDefault();
   }
-
-  // Remove foco de qualquer botão para manter o controle no jogo
-  if (document.activeElement) document.activeElement.blur();
 
   const a = tanks[currentTankIndex];
   if (!a || !a.isPlayer) return;
 
-  const key = e.key || e.keyCode;
+  // Seta Esquerda
+  if (keyStr === 'ARROWLEFT' || keyStr === 'LEFT' || k === 37) {
+    moveDir = isKeyDown ? -1 : 0;
+  }
 
-  // Seta Esquerda (Andar para trás)
-  if (key === 'ArrowLeft' || key === 'Left' || key === 37) moveDir = -1;
+  // Seta Direita
+  if (keyStr === 'ARROWRIGHT' || keyStr === 'RIGHT' || k === 39) {
+    moveDir = isKeyDown ? 1 : 0;
+  }
 
-  // Seta Direita (Andar para frente)
-  if (key === 'ArrowRight' || key === 'Right' || key === 39) moveDir = 1;
+  // Seta Para Cima (Eleva mira)
+  if (keyStr === 'ARROWUP' || keyStr === 'UP' || k === 38) {
+    angleDir = isKeyDown ? 1 : 0;
+  }
 
-  // Seta Para Cima (Eleva a mira do canhão)
-  if (key === 'ArrowUp' || key === 'Up' || key === 38) angleDir = 1;
+  // Seta Para Baixo (Abaixa mira)
+  if (keyStr === 'ARROWDOWN' || keyStr === 'DOWN' || k === 40) {
+    angleDir = isKeyDown ? -1 : 0;
+  }
 
-  // Seta Para Baixo (Abaixa a mira do canhão)
-  if (key === 'ArrowDown' || key === 'Down' || key === 40) angleDir = -1;
-
-  // Botão Confirmar / OK / Enter / Espaço (Carrega a força se segurado)
-  if (key === 'Enter' || key === ' ' || key === 'Select' || key === 'OK' || key === 13) {
-    if (!isShooting && !isChargingPower) {
-      isChargingPower = true;
+  // Botão OK / ENTER (Alternador simples para disparar no controle de TV)
+  if (keyStr === 'ENTER' || keyStr === ' ' || keyStr === 'SELECT' || keyStr === 'OK' || k === 13 || k === 29443) {
+    if (isKeyDown) {
+      if (!isShooting) {
+        if (!isChargingPower) {
+          isChargingPower = true; // 1º toque/manter no OK: Começa a carregar a barra
+        } else {
+          isChargingPower = false; // 2º toque no OK: Efetua o disparo imediato
+          fireProjectile();
+        }
+      }
+    } else {
+      // Se soltar o OK enquanto carrega, dispara (caso a TV suporte soltar teclas)
+      if (isChargingPower) {
+        isChargingPower = false;
+        if (!isShooting) fireProjectile();
+      }
     }
   }
-});
+}
 
-window.addEventListener('keyup', e => {
-  const key = e.key || e.keyCode;
+window.addEventListener('keydown', e => handleKeyInput(e, true));
+window.addEventListener('keyup', e => handleKeyInput(e, false));
 
-  if (key === 'ArrowLeft' || key === 'Left' || key === 37) moveDir = 0;
-  if (key === 'ArrowRight' || key === 'Right' || key === 39) moveDir = 0;
-  if (key === 'ArrowUp' || key === 'Up' || key === 38) angleDir = 0;
-  if (key === 'ArrowDown' || key === 'Down' || key === 40) angleDir = 0;
-
-  // Ao soltar o botão OK / Enter, efetua o disparo com a força carregada
-  if (key === 'Enter' || key === ' ' || key === 'Select' || key === 'OK' || key === 13) {
-    if (isChargingPower) {
-      isChargingPower = false;
-      if (!isShooting) fireProjectile();
-    }
-  }
-});
+// Restaura o foco com qualquer clique na TV
+window.addEventListener('click', keepFocusOnBody);
 
 resizeCanvas();initStage();gameLoop();
 </script>
