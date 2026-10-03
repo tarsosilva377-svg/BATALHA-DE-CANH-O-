@@ -7,6 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+/* Impede que o cursor/foco da TV selecione botões visuais */
+button, input, a { outline: none !important; }
 .health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:44px;z-index:10;flex-shrink:0}
 .player-box{display:flex;align-items:center;gap:8px;flex:1}
 .player-box.right{flex-direction:row-reverse}
@@ -44,21 +46,21 @@ canvas{width:100%;height:100%;display:block}
 #powerText{font-size:8px;font-weight:900}
 </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;" tabindex="0">
 <div class="health-top">
 <div class="player-box"><span class="player-label" id="playerTeamLabel">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
 <div class="center-info"><div class="vs-text" id="stageIndicator">⚔️ FASE 1/20</div><div class="time-text" id="timeIndicator">🌙 00:00</div></div>
 <div class="player-box right"><span class="player-label" id="enemyTeamLabel">🤖 ROBO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
 </div>
-<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — USE O CONTROLE OU O TECLADO</div>
+<div class="turn-line" id="turnIndicator">🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO</div>
 <div class="canvas-container" id="canvasContainer">
 <div class="ai-ammo-indicator" id="aiAmmoIndicator">🤖 IA equipou: ⚫</div>
 <canvas id="gameCanvas"></canvas>
-<div class="modal-overlay" id="gameModal"><div class="modal-card"><div class="modal-title" id="modalTitle">🎉 FASE CONCLUÍDA!</div><div class="modal-desc" id="modalDesc"></div><div class="modal-btns"><button class="btn-modal secondary" id="btnContinue" onclick="nextStage()">CONTINUAR</button><button class="btn-modal" onclick="resetGame(true)">JOGAR DE NOVO</button></div></div></div>
+<div class="modal-overlay" id="gameModal"><div class="modal-card"><div class="modal-title" id="modalTitle">🎉 FASE CONCLUÍDA!</div><div class="modal-desc" id="modalDesc"></div><div class="modal-btns"><button class="btn-modal secondary" id="btnContinue" onclick="nextStage()" tabindex="-1">CONTINUAR</button><button class="btn-modal" onclick="resetGame(true)" tabindex="-1">JOGAR DE NOVO</button></div></div></div>
 </div>
 <div class="controls">
-<div class="pad-group"><span class="pad-label">MOV</span><button class="btn-game btn-move" id="moveLeftBtn">◀</button><button class="btn-game btn-aim" id="forceMinusBtn">➖</button><button class="btn-fire-direct" id="fireBtn">🔥<br><span id="powerText">40%</span></button><button class="btn-game btn-aim" id="forcePlusBtn">➕</button><button class="btn-game btn-move" id="moveRightBtn">▶</button></div>
-<div class="pad-group"><span class="pad-label">MIRA</span><button class="btn-game btn-aim" id="anglePlusBtn">🔼</button><button class="btn-game btn-aim" id="angleMinusBtn">🔽</button><button class="ammo-btn active" data-weapon="0">⚫</button><button class="ammo-btn" data-weapon="1">💣</button></div>
+<div class="pad-group"><span class="pad-label">MOV</span><button class="btn-game btn-move" id="moveLeftBtn" tabindex="-1">◀</button><button class="btn-game btn-aim" id="forceMinusBtn" tabindex="-1">➖</button><button class="btn-fire-direct" id="fireBtn" tabindex="-1">🔥<br><span id="powerText">40%</span></button><button class="btn-game btn-aim" id="forcePlusBtn" tabindex="-1">➕</button><button class="btn-game btn-move" id="moveRightBtn" tabindex="-1">▶</button></div>
+<div class="pad-group"><span class="pad-label">MIRA</span><button class="btn-game btn-aim" id="anglePlusBtn" tabindex="-1">🔼</button><button class="btn-game btn-aim" id="angleMinusBtn" tabindex="-1">🔽</button><button class="ammo-btn active" data-weapon="0" tabindex="-1">⚫</button><button class="ammo-btn" data-weapon="1" tabindex="-1">💣</button></div>
 </div>
 <script>
 const AudioFX={ctx:null,init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume();},playShoot(){this.init();const n=this.ctx.currentTime,o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(300,n);o.frequency.exponentialRampToValueAtTime(40,n+.25);g.gain.setValueAtTime(.8,n);g.gain.exponentialRampToValueAtTime(.01,n+.25);o.connect(g);g.connect(this.ctx.destination);o.start(n);o.stop(n+.25);},playExplosion(){this.init();const n=this.ctx.currentTime,s=this.ctx.sampleRate*.5,b=this.ctx.createBuffer(1,s,this.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<s;i++)d[i]=Math.random()*2-1;const w=this.ctx.createBufferSource();w.buffer=b;const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(800,n);f.frequency.exponentialRampToValueAtTime(30,n+.5);const g=this.ctx.createGain();g.gain.setValueAtTime(1,n);g.gain.exponentialRampToValueAtTime(.01,n+.5);w.connect(f);f.connect(g);g.connect(this.ctx.destination);w.start(n);w.stop(n+.5);}};
@@ -149,7 +151,7 @@ for(let p=0;p<18;p++){let a=Math.random()*Math.PI*2,s=2+Math.random()*5;effects.
 
 function updateTankY(t){t.y=getTerrainY(t.x+t.width/2)-t.height;}
 
-let currentTankIndex=0,selectedWeapon=0,isShooting=false,projectile=null,moveDir=0,angleDir=0,forceDir=0;
+let currentTankIndex=0,selectedWeapon=0,isShooting=false,projectile=null,moveDir=0,angleDir=0,forceDir=0,isChargingPower=false;
 
 function fireProjectile(){
 if(isShooting)return;
@@ -423,7 +425,7 @@ function nextTurn(){
 do{currentTankIndex=(currentTankIndex+1)%tanks.length;}while(tanks[currentTankIndex].health<=0);
 const a=tanks[currentTankIndex];
 if(a.isPlayer){
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CONTROLE OU O TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
 document.getElementById('aiAmmoIndicator').style.display='none';
 document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
 }else if(a.team==='green'){
@@ -591,7 +593,7 @@ if(currentStage<maxStages)currentStage++;
 document.getElementById('gameModal').classList.remove('active');
 if (document.activeElement) document.activeElement.blur();
 initStage();updateHealthBars();isShooting=false;projectile=null;
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CONTROLE OU O TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
 }
 
 function resetGame(fr=false){
@@ -599,7 +601,7 @@ if(fr){currentStage=1;for(let k in aiGlobalBrain.redTanks)delete aiGlobalBrain.r
 document.getElementById('gameModal').classList.remove('active');
 if (document.activeElement) document.activeElement.blur();
 initStage();updateHealthBars();isShooting=false;projectile=null;
-document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CONTROLE OU O TECLADO';
+document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — CONTROLE SUA TV OU TECLADO';
 }
 
 function processControls(){
@@ -617,8 +619,10 @@ a.angle+=angleDir*.8;
 a.angle=Math.max(0,Math.min(85,a.angle));
 }
 
-if(forceDir!==0){
-a.power=Math.max(10,Math.min(100,a.power+forceDir*.6));
+// Aumenta a força enquanto o botão do controle ou tecla estiver pressionado
+if(isChargingPower){
+a.power += 0.7;
+if(a.power > 100) a.power = 10; // Reinicia se passar de 100%
 document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
 }
 }
@@ -660,34 +664,56 @@ document.querySelectorAll('.ammo-btn').forEach((x,i)=>x.classList.toggle('active
 });
 });
 
-// Controles do Teclado
+// Suporte universal aos comandos do controle remoto da TV e teclado
 window.addEventListener('keydown', e => {
+  // Impede que o navegador da TV mova a página ou selecione botões visuais
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' ', 'Select', 'OK', '13', '37', '38', '39', '40'].includes(e.key) || ['Left', 'Right', 'Up', 'Down'].includes(e.key)) {
+    e.preventDefault();
+  }
+
+  // Remove foco de qualquer botão para manter o controle no jogo
+  if (document.activeElement) document.activeElement.blur();
+
   const a = tanks[currentTankIndex];
   if (!a || !a.isPlayer) return;
 
-  if (e.key === 'ArrowLeft') moveDir = -1;
-  if (e.key === 'ArrowRight') moveDir = 1;
-  if (e.key === 'ArrowUp') forceDir = 1;
-  if (e.key === 'ArrowDown') forceDir = -1;
+  const key = e.key || e.keyCode;
 
-  if (e.key === 'a' || e.key === 'A') angleDir = 1;
-  if (e.key === 's' || e.key === 'S') angleDir = -1;
+  // Seta Esquerda (Andar para trás)
+  if (key === 'ArrowLeft' || key === 'Left' || key === 37) moveDir = -1;
 
-  // Aceita 'Enter' ou 'Barra de Espaço' para atirar
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault(); // Impede ações indesejadas de focar/clicar em botões
-    if (!isShooting) fireProjectile();
+  // Seta Direita (Andar para frente)
+  if (key === 'ArrowRight' || key === 'Right' || key === 39) moveDir = 1;
+
+  // Seta Para Cima (Eleva a mira do canhão)
+  if (key === 'ArrowUp' || key === 'Up' || key === 38) angleDir = 1;
+
+  // Seta Para Baixo (Abaixa a mira do canhão)
+  if (key === 'ArrowDown' || key === 'Down' || key === 40) angleDir = -1;
+
+  // Botão Confirmar / OK / Enter / Espaço (Carrega a força se segurado)
+  if (key === 'Enter' || key === ' ' || key === 'Select' || key === 'OK' || key === 13) {
+    if (!isShooting && !isChargingPower) {
+      isChargingPower = true;
+    }
   }
 });
 
 window.addEventListener('keyup', e => {
-  if (e.key === 'ArrowLeft' && moveDir === -1) moveDir = 0;
-  if (e.key === 'ArrowRight' && moveDir === 1) moveDir = 0;
-  if (e.key === 'ArrowUp' && forceDir === 1) forceDir = 0;
-  if (e.key === 'ArrowDown' && forceDir === -1) forceDir = 0;
+  const key = e.key || e.keyCode;
 
-  if ((e.key === 'a' || e.key === 'A') && angleDir === 1) angleDir = 0;
-  if ((e.key === 's' || e.key === 'S') && angleDir === -1) angleDir = 0;
+  if (key === 'ArrowLeft' || key === 'Left' || key === 37) moveDir = 0;
+  if (key === 'ArrowRight' || key === 'Right' || key === 39) moveDir = 0;
+  if (key === 'ArrowUp' || key === 'Up' || key === 38) angleDir = 0;
+  if (key === 'ArrowDown' || key === 'Down' || key === 40) angleDir = 0;
+
+  // Ao soltar o botão OK / Enter, efetua o disparo com a força carregada
+  if (key === 'Enter' || key === ' ' || key === 'Select' || key === 'OK' || key === 13) {
+    if (isChargingPower) {
+      isChargingPower = false;
+      if (!isShooting) fireProjectile();
+    }
+  }
 });
 
 resizeCanvas();initStage();gameLoop();
