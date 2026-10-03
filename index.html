@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha - Design Original</title>
+<title>⚔️ Batalha - Terreno Destrutível & Sons</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0d0914;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
@@ -51,12 +51,21 @@ button, input, a { outline: none !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 12px;
   color: #f1c40f;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.5px;
   flex-shrink: 0;
+}
+
+.ammo-tag {
+  background: #2b223d;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #f1c40f;
+  color: #fff;
+  font-weight: 900;
 }
 
 /* Canvas da Arena */
@@ -162,8 +171,8 @@ canvas { width: 100%; height: 100%; display: block; }
 </div>
 
 <div class="sub-turn-bar">
-  <span class="dot-green"></span>
-  <span>SUA VEZ — USE O CONTROLE (🔴 🟢 🟡 🔵 / NÚMERO 5)</span>
+  <div><span class="dot-green"></span> <span>SUA VEZ (🔴 🟢 🟡 🔵 / 5)</span></div>
+  <div class="ammo-tag" id="ammoDisplay">MÚNICAO [1]: MÍSSIL PADRÃO</div>
 </div>
 
 <div class="canvas-container" id="canvasContainer">
@@ -177,7 +186,7 @@ canvas { width: 100%; height: 100%; display: block; }
     <button class="btn-ctrl" tabindex="-1">➖</button>
     <div class="btn-power" id="btnPower">
       <span class="icon">🔥</span>
-      <span class="val" id="powerVal">40%</span>
+      <span class="val" id="powerVal">0%</span>
     </div>
     <button class="btn-ctrl" tabindex="-1">➕</button>
     <button class="btn-ctrl" id="btnRight" tabindex="-1">▶</button>
@@ -195,6 +204,62 @@ canvas { width: 100%; height: 100%; display: block; }
 </div>
 
 <script>
+// Sistema de Som (Sintetizador Web Audio API)
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio(){
+  if(!audioCtx) audioCtx = new AudioCtx();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type){
+  initAudio();
+  if(!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+  if(type === 'shoot'){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.3);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.3);
+  } else if(type === 'explode'){
+    const bufferSize = audioCtx.sampleRate * 0.4;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.linearRampToValueAtTime(50, now + 0.4);
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.5, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+
+    noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+    noise.start(now); noise.stop(now + 0.4);
+  } else if(type === 'select'){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.setValueAtTime(800, now + 0.08);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.15);
+  }
+}
+
 const canvas = document.getElementById('gameCanvas');
 const container = document.getElementById('canvasContainer');
 const ctx = canvas.getContext('2d');
@@ -218,8 +283,20 @@ function resizeCanvas(){
 }
 window.addEventListener('resize', resizeCanvas);
 
-let terrainHeights = [], player = {}, enemy = {}, projectile = null;
+let terrainHeights = [], player = {}, enemy = {}, projectile = null, explosionAnim = null;
 let isShooting = false, moveDir = 0, angleDir = 0, isChargingPower = false;
+let selectedWeapon = 1; // 1 = Míssil Padrão, 2 = Super Bomba
+
+function selectWeapon(id){
+  selectedWeapon = id;
+  const ammoDisplay = document.getElementById('ammoDisplay');
+  if(id === 1){
+    ammoDisplay.textContent = 'MÚNICAO [1]: MÍSSIL PADRÃO';
+  } else {
+    ammoDisplay.textContent = 'MÚNICAO [2]: SUPER BOMBA PESADA';
+  }
+  playSound('select');
+}
 
 function initGame(){
   const b = logicalHeight * 0.62;
@@ -229,7 +306,7 @@ function initGame(){
     terrainHeights[x] = b + Math.sin(x * 0.012) * 35 + Math.cos(x * 0.006) * 20;
   }
 
-  player = { x: 50, y: 0, angle: 40, power: 40, facing: 1 };
+  player = { x: 50, y: 0, angle: 40, power: 0, facing: 1 };
   enemy  = { x: logicalWidth - 50, y: 0, health: 100 };
   updatePositions();
 }
@@ -241,6 +318,21 @@ function getTerrainY(x){
   return terrainHeights[i];
 }
 
+/* Destruição Real do Terreno */
+function destroyTerrain(impactX, radius){
+  const startX = Math.max(0, Math.floor(impactX - radius));
+  const endX = Math.min(logicalWidth, Math.ceil(impactX + radius));
+
+  for(let x = startX; x <= endX; x++){
+    const dist = Math.abs(x - impactX);
+    if(dist < radius){
+      const depth = Math.sqrt(radius * radius - dist * dist);
+      terrainHeights[x] += depth * 0.85; // Afunda o chão criando a cratera
+    }
+  }
+  updatePositions();
+}
+
 function updatePositions(){
   player.y = getTerrainY(player.x) - 20;
   enemy.y  = getTerrainY(enemy.x) - 20;
@@ -249,6 +341,8 @@ function updatePositions(){
 function fireProjectile(){
   if(isShooting) return;
   isShooting = true;
+  playSound('shoot');
+
   const rad = player.angle * Math.PI / 180;
   const speed = 3 + (player.power / 100) * 11;
   
@@ -257,7 +351,8 @@ function fireProjectile(){
     y: player.y - 8,
     vx: Math.cos(rad) * speed * player.facing,
     vy: -Math.sin(rad) * speed,
-    gravity: 0.18
+    gravity: 0.18,
+    type: selectedWeapon
   };
 }
 
@@ -284,6 +379,7 @@ function drawBackground(){
   ctx.lineTo(logicalWidth, logicalHeight);
   ctx.fill();
 
+  // Terreno Destrutível
   ctx.beginPath();
   ctx.moveTo(0, logicalHeight);
   for(let x = 0; x <= logicalWidth; x += 2){
@@ -301,14 +397,6 @@ function drawBackground(){
   ctx.strokeStyle = '#2ecc71';
   ctx.lineWidth = 3;
   ctx.stroke();
-
-  ctx.fillStyle = '#7f8c8d';
-  [120, 150, 480, 500, 680, 700].forEach(px => {
-    if(px < logicalWidth){
-      const py = getTerrainY(px) - 6;
-      ctx.fillRect(px, py, 8, 6);
-    }
-  });
 }
 
 function drawCharacters(){
@@ -352,8 +440,16 @@ function updateGame(){
       player.angle = Math.max(-10, Math.min(85, player.angle + angleDir * 1.2));
     }
     if(isChargingPower){
-      player.power = (player.power + 1.2) % 100;
-      document.getElementById('powerVal').textContent = `${Math.floor(player.power)}%`;
+      player.power += 1.5;
+      // Ao atingir 100%, dispara automaticamente!
+      if(player.power >= 100){
+        player.power = 100;
+        document.getElementById('powerVal').textContent = `100%`;
+        isChargingPower = false;
+        fireProjectile();
+      } else {
+        document.getElementById('powerVal').textContent = `${Math.floor(player.power)}%`;
+      }
     }
   }
 
@@ -363,8 +459,16 @@ function updateGame(){
     projectile.y += projectile.vy;
 
     if(projectile.y >= getTerrainY(projectile.x)){
+      const radius = projectile.type === 2 ? 28 : 16;
+      destroyTerrain(projectile.x, radius);
+      
+      explosionAnim = { x: projectile.x, y: projectile.y, r: 2, maxR: radius };
+      playSound('explode');
+
       projectile = null;
       isShooting = false;
+      player.power = 0;
+      document.getElementById('powerVal').textContent = `0%`;
     }
   }
 }
@@ -377,58 +481,70 @@ function gameLoop(){
 
   if(projectile){
     ctx.beginPath();
-    ctx.arc(projectile.x, projectile.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#f1c40f';
+    ctx.arc(projectile.x, projectile.y, projectile.type === 2 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = projectile.type === 2 ? '#ff4757' : '#f1c40f';
     ctx.fill();
   }
+
+  if(explosionAnim){
+    ctx.beginPath();
+    ctx.arc(explosionAnim.x, explosionAnim.y, explosionAnim.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 152, 0, 0.7)';
+    ctx.fill();
+    explosionAnim.r += 2;
+    if(explosionAnim.r >= explosionAnim.maxR) explosionAnim = null;
+  }
+
   requestAnimationFrame(gameLoop);
 }
 
-// Trata os eventos do Controle com prioridade e previne ação do navegador TV
 function handleKey(e, isDown){
   keepTvFocus();
   const code = e.keyCode || e.which;
   const key = (e.key || '').toLowerCase();
   const eCode = e.code || '';
 
-  // Identificação universal do botão 5 do controle/teclado
-  const isButtonFive = (
-    code === 53 || 
-    code === 101 || 
-    key === '5' || 
-    eCode === 'Digit5' || 
-    eCode === 'Numpad5'
-  );
+  // Seleção de Munição (Teclas 1 e 2)
+  if(code === 49 || key === '1' || eCode === 'Digit1'){
+    if(e.preventDefault) e.preventDefault();
+    selectWeapon(1);
+    return;
+  }
+  if(code === 50 || key === '2' || eCode === 'Digit2'){
+    if(e.preventDefault) e.preventDefault();
+    selectWeapon(2);
+    return;
+  }
 
-  // Vermelho (🔴) / Seta Esquerda / 'A' -> Andar para Trás
+  const isButtonFive = (code === 53 || code === 101 || key === '5' || eCode === 'Digit5' || eCode === 'Numpad5');
+
   if(code === 403 || key === 'r' || code === 37 || key === 'a') {
     if(e.preventDefault) e.preventDefault();
     moveDir = isDown ? -1 : 0;
   }
 
-  // Verde (🟢) / Seta Direita / 'D' -> Andar para Frente
   if(code === 404 || key === 'g' || code === 39 || key === 'd') {
     if(e.preventDefault) e.preventDefault();
     moveDir = isDown ? 1 : 0;
   }
 
-  // Amarelo (🟡) / Seta Cima / 'W' -> Mira para Cima
   if(code === 405 || key === 'y' || code === 38 || key === 'w') {
     if(e.preventDefault) e.preventDefault();
     angleDir = isDown ? 1 : 0;
   }
 
-  // Azul (🔵) / Seta Baixo / 'S' -> Mira para Baixo
   if(code === 406 || key === 'b' || code === 40 || key === 's') {
     if(e.preventDefault) e.preventDefault();
     angleDir = isDown ? -1 : 0;
   }
 
-  // Botão 5 -> Atirar / Carregar Força
   if(isButtonFive || code === 32 || key === ' ') {
     if(e.preventDefault) e.preventDefault();
     if(isDown){
-      if(!isShooting && !isChargingPower) isChargingPower = true;
+      if(!isShooting && !isChargingPower) {
+        player.power = 0;
+        isChargingPower = true;
+      }
     } else {
       if(isChargingPower){
         isChargingPower = false;
@@ -438,15 +554,13 @@ function handleKey(e, isDown){
   }
 }
 
-// Captura no nível de janela (useCapture = true) para interceptar antes da TV
 window.addEventListener('keydown', e => handleKey(e, true), true);
 window.addEventListener('keyup', e => handleKey(e, false), true);
 
-// Suporte para toque ou clique do mouse nos botões da tela
 const btnFire = document.getElementById('btnFire');
-btnFire.addEventListener('mousedown', () => { if(!isShooting) isChargingPower = true; });
+btnFire.addEventListener('mousedown', () => { if(!isShooting) { player.power = 0; isChargingPower = true; } });
 btnFire.addEventListener('mouseup', () => { if(isChargingPower){ isChargingPower = false; fireProjectile(); } });
-btnFire.addEventListener('touchstart', (e) => { e.preventDefault(); if(!isShooting) isChargingPower = true; });
+btnFire.addEventListener('touchstart', (e) => { e.preventDefault(); if(!isShooting) { player.power = 0; isChargingPower = true; } });
 btnFire.addEventListener('touchend', (e) => { e.preventDefault(); if(isChargingPower){ isChargingPower = false; fireProjectile(); } });
 
 resizeCanvas();
