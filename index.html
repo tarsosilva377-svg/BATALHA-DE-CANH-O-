@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚔️ Batalha de Palitos - Design Original</title>
+<title>⚔️ Batalha - Design Original</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
+html,body{background:#0d0914;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
 button, input, a { outline: none !important; }
 
 #tvInput {
@@ -19,55 +19,189 @@ button, input, a { outline: none !important; }
   pointer-events: none;
 }
 
-.health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:40px;z-index:10;flex-shrink:0}
-.player-box{display:flex;align-items:center;gap:8px;flex:1}
-.player-box.right{flex-direction:row-reverse}
-.player-label{color:#fff;font-weight:800;font-size:11px;letter-spacing:1px}
-.health-bar{width:110px;height:12px;background:#0a0812;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.2)}
-.health-fill{height:100%;transition:width.4s ease;border-radius:10px}
-.green-fill{background:linear-gradient(90deg,#00ff88,#2ecc71)}
-.red-fill{background:linear-gradient(90deg,#ff4757,#e74c3c)}
-.center-info{text-align:center}
-.vs-text{color:#f1c40f;font-weight:900;font-size:12px}
+/* Faixa Superior Escura */
+.top-bar {
+  width: 100%;
+  height: 48px;
+  background: #120c1f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  z-index: 10;
+  flex-shrink: 0;
+}
+.player-info { display: flex; align-items: center; gap: 8px; }
+.dot-green { width: 10px; height: 10px; background: #00ff66; border-radius: 50%; display: inline-block; }
+.p-label { color: #ffffff; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
+.hp-bar-bg { width: 120px; height: 14px; background: #1a1228; border-radius: 10px; padding: 2px; border: 1px solid rgba(255,255,255,0.15); }
+.hp-fill-green { width: 100%; height: 100%; background: #2ecc71; border-radius: 8px; transition: width 0.3s; }
+.hp-fill-red { width: 100%; height: 100%; background: #ff4757; border-radius: 8px; transition: width 0.3s; }
 
-.canvas-container{flex:1;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;width:100%}
-canvas{width:100%;height:100%;display:block}
+.center-header { text-align: center; }
+.phase-title { color: #f1c40f; font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.sub-info { color: #f1c40f; font-size: 10px; opacity: 0.8; font-weight: 600; margin-top: 1px; }
 
-.controls{width:100%;padding:8px 12px;background:rgba(18,13,32,.98);border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;gap:10px;height:65px;flex-shrink:0}
-.pad-group{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);padding:6px 10px;border-radius:10px}
-.pad-label{color:#aaa;font-size:10px;font-weight:800;margin-right:4px}
-.btn-game{background:linear-gradient(180deg,#3a2d5e,#2b1f47);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}
-.btn-fire-direct{width:80px;height:45px;background:linear-gradient(180deg,#ffd32a,#ff6b00);color:#000;font-weight:900;border:none;border-radius:10px;box-shadow:0 0 10px rgba(255,107,0,.4);font-size:11px;line-height:1.1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#powerText{font-size:10px;font-weight:900;margin-top:2px}
+/* Sub-header "SUA VEZ" */
+.sub-turn-bar {
+  width: 100%;
+  height: 22px;
+  background: rgba(18, 12, 31, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #f1c40f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* Canvas da Arena */
+.canvas-container { flex: 1; position: relative; width: 100%; overflow: hidden; }
+canvas { width: 100%; height: 100%; display: block; }
+
+/* Painel Inferior de Controles */
+.bottom-controls {
+  width: 100%;
+  height: 75px;
+  background: #110b1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.control-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-label { color: #8a8599; font-size: 10px; font-weight: 800; margin-right: 4px; }
+
+.btn-ctrl {
+  width: 38px;
+  height: 38px;
+  background: #2b223d;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.btn-ctrl:active { background: #3d3156; }
+
+/* Botão Amarelo de Carga 🔥 */
+.btn-power {
+  width: 62px;
+  height: 42px;
+  background: linear-gradient(180deg, #ffc107, #ff9800);
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(255, 152, 0, 0.4);
+  cursor: pointer;
+}
+.btn-power .icon { font-size: 14px; }
+.btn-power .val { font-size: 10px; margin-top: -2px; }
+
+/* Botão Amarelo Redondo de Disparo 🟡 */
+.btn-fire-round {
+  width: 44px;
+  height: 42px;
+  background: linear-gradient(180deg, #ffc107, #ff9800);
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(255, 152, 0, 0.4);
+  cursor: pointer;
+}
+.inner-circle {
+  width: 20px;
+  height: 20px;
+  background: #1a1228;
+  border-radius: 50%;
+}
 </style>
 </head>
 <body id="gameBody" oncontextmenu="return false;">
 
 <input type="text" id="tvInput" readonly>
 
-<div class="health-top">
-  <div class="player-box"><span class="player-label">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
-  <div class="center-info"><div class="vs-text">⚔️️ BATALHA DE PALITOS</div></div>
-  <div class="player-box right"><span class="player-label">🤖 INIMIGO</span><div class="health-bar"><div id="healthRed" class="health-fill red-fill" style="width:100%"></div></div></div>
+<!-- Faixa Superior Escura -->
+<div class="top-bar">
+  <div class="player-info">
+    <span class="dot-green"></span>
+    <span class="p-label">VOCÊ</span>
+    <div class="hp-bar-bg"><div id="hpPlayer" class="hp-fill-green"></div></div>
+  </div>
+
+  <div class="center-header">
+    <div class="phase-title">⚔️ FASE 1/20</div>
+    <div class="sub-info">🌙 5% - 00:05</div>
+  </div>
+
+  <div class="player-info">
+    <div class="hp-bar-bg"><div id="hpEnemy" class="hp-fill-red"></div></div>
+    <span class="p-label">ROBÔ</span>
+    <span style="font-size:14px">🤖</span>
+  </div>
 </div>
 
+<!-- Sub-header -->
+<div class="sub-turn-bar">
+  <span class="dot-green"></span>
+  <span>SUA VEZ — USE O CONTROLE</span>
+</div>
+
+<!-- Canvas -->
 <div class="canvas-container" id="canvasContainer">
   <canvas id="gameCanvas"></canvas>
 </div>
 
-<div class="controls">
-  <div class="pad-group">
-    <span class="pad-label">MOVER:</span>
-    <button class="btn-game" tabindex="-1">◀</button>
-    <button class="btn-game" tabindex="-1">▶</button>
+<!-- Barra de Controles Inferior -->
+<div class="bottom-controls">
+  <!-- Grupo MOV -->
+  <div class="control-card">
+    <span class="card-label">MOV</span>
+    <button class="btn-ctrl" id="btnLeft" tabindex="-1">◀</button>
+    <button class="btn-ctrl" tabindex="-1">➖</button>
+    <div class="btn-power" id="btnPower">
+      <span class="icon">🔥</span>
+      <span class="val" id="powerVal">40%</span>
+    </div>
+    <button class="btn-ctrl" tabindex="-1">➕</button>
+    <button class="btn-ctrl" id="btnRight" tabindex="-1">▶</button>
   </div>
-  <div class="pad-group">
-    <span class="pad-label">MIRA:</span>
-    <button class="btn-game" tabindex="-1">▲</button>
-    <button class="btn-game" tabindex="-1">▼</button>
-  </div>
-  <div class="pad-group">
-    <button class="btn-fire-direct" tabindex="-1">🔥 ATIRAR<br><span id="powerText">40%</span></button>
+
+  <!-- Grupo MIRA -->
+  <div class="control-card">
+    <span class="card-label">MIRA</span>
+    <button class="btn-ctrl" id="btnUp" tabindex="-1">▲</button>
+    <button class="btn-ctrl" id="btnDown" tabindex="-1">▼</button>
+    <!-- Botão Redondo Amarelo de Disparo -->
+    <button class="btn-fire-round" id="btnFire" tabindex="-1">
+      <div class="inner-circle"></div>
+    </button>
+    <button class="btn-ctrl" tabindex="-1">💣</button>
   </div>
 </div>
 
@@ -91,129 +225,156 @@ function resizeCanvas(){
   canvas.height = logicalHeight * dpr;
   ctx.resetTransform();
   ctx.scale(dpr, dpr);
-  if(!terrainHeights || terrainHeights.length === 0) initStage();
+  if(!terrainHeights || terrainHeights.length === 0) initGame();
 }
 window.addEventListener('resize', resizeCanvas);
 
-let terrainHeights = [], stickmen = [], projectile = null;
-let currentTurn = 0, isShooting = false, moveDir = 0, angleDir = 0, isChargingPower = false;
+let terrainHeights = [], player = {}, enemy = {}, projectile = null;
+let isShooting = false, moveDir = 0, angleDir = 0, isChargingPower = false;
 
-function initStage(){
-  const b = logicalHeight * 0.7;
+function initGame(){
+  const b = logicalHeight * 0.62;
   terrainHeights = new Float32Array(Math.ceil(logicalWidth) + 1);
+  
+  // Terreno de colinas suaves igual ao print
   for(let x = 0; x <= logicalWidth; x++){
-    terrainHeights[x] = b + Math.sin(x * 0.015) * 20 + Math.cos(x * 0.008) * 15;
+    terrainHeights[x] = b + Math.sin(x * 0.012) * 35 + Math.cos(x * 0.006) * 20;
   }
 
-  stickmen = [
-    { id: 0, isPlayer: true, x: 50, y: 0, angle: 45, power: 40, health: 100, color: '#2ecc71', facing: 1 },
-    { id: 1, isPlayer: false, x: logicalWidth - 70, y: 0, angle: 45, power: 40, health: 100, color: '#e74c3c', facing: -1 }
-  ];
-  stickmen.forEach(s => updateY(s));
+  player = { x: 50, y: 0, angle: 40, power: 40, facing: 1 };
+  enemy  = { x: logicalWidth - 50, y: 0, health: 100 };
+  updatePositions();
 }
 
 function getTerrainY(x){
   const i = Math.floor(x);
-  if(i < 0) return terrainHeights[0] || logicalHeight * 0.7;
-  if(i >= logicalWidth) return terrainHeights[Math.floor(logicalWidth)] || logicalHeight * 0.7;
+  if(i < 0) return terrainHeights[0] || logicalHeight * 0.62;
+  if(i >= logicalWidth) return terrainHeights[Math.floor(logicalWidth)] || logicalHeight * 0.62;
   return terrainHeights[i];
 }
 
-function updateY(s){ s.y = getTerrainY(s.x) - 25; }
+function updatePositions(){
+  player.y = getTerrainY(player.x) - 20;
+  enemy.y  = getTerrainY(enemy.x) - 20;
+}
 
 function fireProjectile(){
   if(isShooting) return;
   isShooting = true;
-  let s = stickmen[currentTurn];
-  const rad = s.angle * Math.PI / 180;
-  const speed = 3 + (s.power / 100) * 10;
+  const rad = player.angle * Math.PI / 180;
+  const speed = 3 + (player.power / 100) * 11;
   
   projectile = {
-    x: s.x,
-    y: s.y,
-    vx: Math.cos(rad) * speed * s.facing,
+    x: player.x,
+    y: player.y - 8,
+    vx: Math.cos(rad) * speed * player.facing,
     vy: -Math.sin(rad) * speed,
-    gravity: 0.2
+    gravity: 0.18
   };
 }
 
 function drawBackground(){
-  // Fundo original roxo/crepúsculo
+  // Gradiente Pôr do Sol / Crepúsculo (Roxo/Laranja)
   let grad = ctx.createLinearGradient(0, 0, 0, logicalHeight);
-  grad.addColorStop(0, '#150a21');
-  grad.addColorStop(0.5, '#4a154b');
-  grad.addColorStop(1, '#8c245c');
+  grad.addColorStop(0, '#190a28');
+  grad.addColorStop(0.4, '#4a154b');
+  grad.addColorStop(0.7, '#8a2b43');
+  grad.addColorStop(1, '#e65c40');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-  // Montanhas de fundo
-  ctx.fillStyle = 'rgba(40, 15, 55, 0.6)';
+  // Sol no horizonte
+  ctx.beginPath();
+  ctx.arc(logicalWidth * 0.48, logicalHeight * 0.6, 25, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffeb3b';
+  ctx.fill();
+
+  // Montanhas Roxas
+  ctx.fillStyle = '#2b1033';
   ctx.beginPath();
   ctx.moveTo(0, logicalHeight);
   for(let x = 0; x <= logicalWidth; x += 10){
-    ctx.lineTo(x, logicalHeight * 0.5 + Math.sin(x * 0.005) * 40);
+    ctx.lineTo(x, logicalHeight * 0.52 + Math.sin(x * 0.005) * 40);
   }
   ctx.lineTo(logicalWidth, logicalHeight);
   ctx.fill();
 
-  // Terreno e linha verde cintilante
+  // Terreno Escuro com hachuras
   ctx.beginPath();
   ctx.moveTo(0, logicalHeight);
   for(let x = 0; x <= logicalWidth; x += 2){
     ctx.lineTo(x, getTerrainY(x));
   }
   ctx.lineTo(logicalWidth, logicalHeight);
-  ctx.fillStyle = '#2c1e14';
+  ctx.fillStyle = '#241a15';
   ctx.fill();
 
+  // Linha Verde na superfície do terreno
   ctx.beginPath();
   for(let x = 0; x <= logicalWidth; x += 2){
     if(x === 0) ctx.moveTo(x, getTerrainY(x));
     else ctx.lineTo(x, getTerrainY(x));
   }
-  ctx.strokeStyle = '#00ff88';
+  ctx.strokeStyle = '#2ecc71';
   ctx.lineWidth = 3;
   ctx.stroke();
+
+  // Pedras cinzas nas colinas
+  ctx.fillStyle = '#7f8c8d';
+  [120, 150, 480, 500, 680, 700].forEach(px => {
+    if(px < logicalWidth){
+      const py = getTerrainY(px) - 6;
+      ctx.fillRect(px, py, 8, 6);
+    }
+  });
 }
 
-function drawStickman(s){
-  if(s.health <= 0) return;
+function drawCharacters(){
+  // Jogador Verde (Com Capacete)
   ctx.save();
-  ctx.strokeStyle = s.color;
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(player.x, player.y, 6, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = '#2ecc71'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(player.x, player.y+6); ctx.lineTo(player.x, player.y+18); ctx.stroke();
 
-  // Cabeça e Corpo de Palito
-  ctx.beginPath(); ctx.arc(s.x, s.y, 6, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s.x, s.y + 6); ctx.lineTo(s.x, s.y + 20); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s.x, s.y + 20); ctx.lineTo(s.x - 5, s.y + 28); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s.x, s.y + 20); ctx.lineTo(s.x + 5, s.y + 28); ctx.stroke();
-
-  // Linha Amarela de Mira
-  if(s.isPlayer && !isShooting){
-    const rad = s.angle * Math.PI / 180;
+  // Mira Amarela
+  if(!isShooting){
+    const rad = player.angle * Math.PI / 180;
     ctx.beginPath();
-    ctx.moveTo(s.x, s.y + 10);
-    ctx.lineTo(s.x + Math.cos(rad) * 30 * s.facing, s.y + 10 - Math.sin(rad) * 30);
+    ctx.moveTo(player.x, player.y + 4);
+    ctx.lineTo(player.x + Math.cos(rad)*25*player.facing, player.y + 4 - Math.sin(rad)*25);
     ctx.strokeStyle = '#f1c40f';
     ctx.lineWidth = 2;
     ctx.stroke();
   }
   ctx.restore();
+
+  // Inimigo Vermelho (Com Rótulo Pts:0)
+  ctx.save();
+  ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(enemy.x, enemy.y, 6, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = '#e74c3c'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(enemy.x, enemy.y+6); ctx.lineTo(enemy.x, enemy.y+18); ctx.stroke();
+  
+  ctx.fillStyle = '#f1c40f';
+  ctx.font = 'bold 10px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText("Pts:0", enemy.x, enemy.y - 14);
+  ctx.restore();
 }
 
-function updateGame(delta){
-  const s = stickmen[currentTurn];
-  if(s && s.isPlayer && !isShooting){
+function updateGame(){
+  if(!isShooting){
     if(moveDir !== 0){
-      s.x = Math.max(15, Math.min(logicalWidth - 15, s.x + moveDir * 1.5));
-      updateY(s);
+      player.x = Math.max(15, Math.min(logicalWidth - 15, player.x + moveDir * 1.5));
+      updatePositions();
     }
     if(angleDir !== 0){
-      s.angle = Math.max(0, Math.min(85, s.angle + angleDir * 1.2));
+      player.angle = Math.max(-10, Math.min(85, player.angle + angleDir * 1.2));
     }
     if(isChargingPower){
-      s.power = (s.power + 1) % 100;
-      document.getElementById('powerText').textContent = `${Math.floor(s.power)}%`;
+      player.power = (player.power + 1.2) % 100;
+      document.getElementById('powerVal').textContent = `${Math.floor(player.power)}%`;
     }
   }
 
@@ -225,14 +386,6 @@ function updateGame(delta){
     if(projectile.y >= getTerrainY(projectile.x)){
       projectile = null;
       isShooting = false;
-      currentTurn = (currentTurn + 1) % stickmen.length;
-      if(!stickmen[currentTurn].isPlayer){
-        setTimeout(() => {
-          stickmen[1].angle = 30 + Math.random() * 30;
-          stickmen[1].power = 30 + Math.random() * 40;
-          fireProjectile();
-        }, 800);
-      }
     }
   }
 }
@@ -241,31 +394,29 @@ function gameLoop(){
   updateGame();
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   drawBackground();
-  stickmen.forEach(s => drawStickman(s));
+  drawCharacters();
 
   if(projectile){
     ctx.beginPath();
     ctx.arc(projectile.x, projectile.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffcc00';
+    ctx.fillStyle = '#f1c40f';
     ctx.fill();
   }
   requestAnimationFrame(gameLoop);
 }
 
+// Eventos de Teclado / Controle TV
 function handleKey(e, isDown){
   keepTvFocus();
   const code = e.keyCode || e.which;
   const key = (e.key || '').toLowerCase();
 
-  // Movimento: Setas, A/D, Teclas Coloridas
   if(code === 37 || key === 'a' || code === 403 || key === 'r') moveDir = isDown ? -1 : 0;
   if(code === 39 || key === 'd' || code === 404 || key === 'g') moveDir = isDown ? 1 : 0;
-
-  // Mira: Setas, W/S, CH+/CH- (33/34), Teclas 1/2
   if(code === 38 || key === 'w' || code === 405 || key === 'y' || code === 33 || code === 427 || key === '1') angleDir = isDown ? 1 : 0;
   if(code === 40 || key === 's' || code === 406 || key === 'b' || code === 34 || code === 428 || key === '2') angleDir = isDown ? -1 : 0;
 
-  // Disparo: OK / ENTER / ESPAÇO
+  // Tecla de Disparo: OK / Enter / Espaço
   if(code === 13 || code === 32 || key === 'enter' || key === 'ok' || key === ' ') {
     if(isDown){
       if(!isShooting && !isChargingPower) isChargingPower = true;
@@ -281,8 +432,15 @@ function handleKey(e, isDown){
 window.addEventListener('keydown', e => handleKey(e, true));
 window.addEventListener('keyup', e => handleKey(e, false));
 
+// Cliques nos Botões na Tela
+const btnFire = document.getElementById('btnFire');
+btnFire.addEventListener('mousedown', () => { if(!isShooting) isChargingPower = true; });
+btnFire.addEventListener('mouseup', () => { if(isChargingPower){ isChargingPower = false; fireProjectile(); } });
+btnFire.addEventListener('touchstart', (e) => { e.preventDefault(); if(!isShooting) isChargingPower = true; });
+btnFire.addEventListener('touchend', (e) => { e.preventDefault(); if(isChargingPower){ isChargingPower = false; fireProjectile(); } });
+
 resizeCanvas();
-initStage();
+initGame();
 gameLoop();
 </script>
 </body>
