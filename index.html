@@ -119,6 +119,7 @@ document.getElementById('playerTeamLabel').textContent='🟢 VOCÊ';document.get
 }
 tanks.forEach(t=>updateTankY(t));currentTankIndex=0;effects=[];matchTime=0;
 document.getElementById('stageIndicator').textContent=`⚔️ FASE ${currentStage}/${maxStages}`;
+if (document.activeElement) document.activeElement.blur();
 }
 
 function getTerrainY(x){const i=Math.floor(x);if(i<0)return terrainHeights[0]||logicalHeight*.68;if(i>=logicalWidth)return terrainHeights[Math.floor(logicalWidth)]||logicalHeight*.68;return terrainHeights[i];}
@@ -443,6 +444,7 @@ a.targetX=a.x;
 setTimeout(()=>executeAIShot(a),500);
 }
 }
+if (document.activeElement) document.activeElement.blur();
 }
 
 function simulateShot(shooter, ad, pv, wo) {
@@ -587,6 +589,7 @@ document.getElementById('gameModal').classList.add('active');
 function nextStage(){
 if(currentStage<maxStages)currentStage++;
 document.getElementById('gameModal').classList.remove('active');
+if (document.activeElement) document.activeElement.blur();
 initStage();updateHealthBars();isShooting=false;projectile=null;
 document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CONTROLE OU O TECLADO';
 }
@@ -594,6 +597,7 @@ document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CON
 function resetGame(fr=false){
 if(fr){currentStage=1;for(let k in aiGlobalBrain.redTanks)delete aiGlobalBrain.redTanks[k];aiGlobalBrain.successfulShotsMemory=[];}
 document.getElementById('gameModal').classList.remove('active');
+if (document.activeElement) document.activeElement.blur();
 initStage();updateHealthBars();isShooting=false;projectile=null;
 document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — USE O CONTROLE OU O TECLADO';
 }
@@ -666,10 +670,12 @@ window.addEventListener('keydown', e => {
   if (e.key === 'ArrowUp') forceDir = 1;
   if (e.key === 'ArrowDown') forceDir = -1;
 
-  if (e.key === 'w' || e.key === 'W') angleDir = 1;
+  if (e.key === 'a' || e.key === 'A') angleDir = 1;
   if (e.key === 's' || e.key === 'S') angleDir = -1;
 
-  if (e.key === 'Enter') {
+  // Aceita 'Enter' ou 'Barra de Espaço' para atirar
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault(); // Impede ações indesejadas de focar/clicar em botões
     if (!isShooting) fireProjectile();
   }
 });
@@ -680,7 +686,7 @@ window.addEventListener('keyup', e => {
   if (e.key === 'ArrowUp' && forceDir === 1) forceDir = 0;
   if (e.key === 'ArrowDown' && forceDir === -1) forceDir = 0;
 
-  if ((e.key === 'w' || e.key === 'A') && angleDir === 1) angleDir = 0;
+  if ((e.key === 'a' || e.key === 'A') && angleDir === 1) angleDir = 0;
   if ((e.key === 's' || e.key === 'S') && angleDir === -1) angleDir = 0;
 });
 
