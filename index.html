@@ -8,6 +8,18 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{background:#0a0714;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;outline:none}
 button, input, a { outline: none !important; }
+
+/* Input invisível para capturar o controle da TV Toshiba */
+#tvInput {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .health-top{width:100%;padding:4px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,14,35,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(241,196,15,.2);height:44px;z-index:10;flex-shrink:0}
 .player-box{display:flex;align-items:center;gap:8px;flex:1}
 .player-box.right{flex-direction:row-reverse}
@@ -45,7 +57,11 @@ canvas{width:100%;height:100%;display:block}
 #powerText{font-size:8px;font-weight:900}
 </style>
 </head>
-<body id="gameBody" oncontextmenu="return false;" tabindex="0" autofocus>
+<body id="gameBody" oncontextmenu="return false;">
+
+<!-- Elemento invisível focado para capturar a TV Toshiba -->
+<input type="text" id="tvInput" readonly>
+
 <div class="health-top">
 <div class="player-box"><span class="player-label" id="playerTeamLabel">🟢 VOCÊ</span><div class="health-bar"><div id="healthGreen" class="health-fill green-fill" style="width:100%"></div></div></div>
 <div class="center-info"><div class="vs-text" id="stageIndicator">⚔️ FASE 1/20</div><div class="time-text" id="timeIndicator">🌙 00:00</div></div>
@@ -68,12 +84,14 @@ let dpr=window.devicePixelRatio||1,logicalWidth=0,logicalHeight=0,currentStage=1
 const aiGlobalBrain={redTanks:{},successfulShotsMemory:[]};
 function getOrCreateAiBrain(id){if(!aiGlobalBrain.redTanks[id])aiGlobalBrain.redTanks[id]={powerCorrection:0,angleCorrection:0,score:0,shotsCount:0,lastShotInfo:null,wasHitLastTurn:false};return aiGlobalBrain.redTanks[id];}
 
-function keepFocusOnBody() {
-  const b = document.getElementById('gameBody');
-  if (b && document.activeElement !== b) {
-    b.focus();
+// Sistema para prender o foco no input invisível
+function keepTvFocus() {
+  const input = document.getElementById('tvInput');
+  if (input && document.activeElement !== input) {
+    input.focus();
   }
 }
+setInterval(keepTvFocus, 300);
 
 function resizeCanvas(){
 dpr=window.devicePixelRatio||1;
@@ -126,8 +144,8 @@ tanks.push({id:4,team:'red',isPlayer:false,x:logicalWidth-50,y:0,width:20,height
 document.getElementById('playerTeamLabel').textContent='🟢 VOCÊ';document.getElementById('enemyTeamLabel').textContent='🤖 ROBO';
 }
 tanks.forEach(t=>updateTankY(t));currentTankIndex=0;effects=[];matchTime=0;
-document.getElementById('stageIndicator').textContent=`⚔️️ FASE ${currentStage}/${maxStages}`;
-keepFocusOnBody();
+document.getElementById('stageIndicator').textContent=`⚔ FASE ${currentStage}/${maxStages}`;
+keepTvFocus();
 }
 
 function getTerrainY(x){const i=Math.floor(x);if(i<0)return terrainHeights[0]||logicalHeight*.68;if(i>=logicalWidth)return terrainHeights[Math.floor(logicalWidth)]||logicalHeight*.68;return terrainHeights[i];}
@@ -452,7 +470,7 @@ a.targetX=a.x;
 setTimeout(()=>executeAIShot(a),500);
 }
 }
-keepFocusOnBody();
+keepTvFocus();
 }
 
 function simulateShot(shooter, ad, pv, wo) {
@@ -597,7 +615,7 @@ document.getElementById('gameModal').classList.add('active');
 function nextStage(){
 if(currentStage<maxStages)currentStage++;
 document.getElementById('gameModal').classList.remove('active');
-keepFocusOnBody();
+keepTvFocus();
 initStage();updateHealthBars();isShooting=false;projectile=null;
 document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO';
 }
@@ -605,88 +623,91 @@ document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: AN
 function resetGame(fr=false){
 if(fr){currentStage=1;for(let k in aiGlobalBrain.redTanks)delete aiGlobalBrain.redTanks[k];aiGlobalBrain.successfulShotsMemory=[];}
 document.getElementById('gameModal').classList.remove('active');
-keepFocusOnBody();
+keepTvFocus();
 initStage();updateHealthBars();isShooting=false;projectile=null;
 document.getElementById('turnIndicator').textContent='🟢 SUA VEZ — SETAS: ANDAR/MIRA | OK: FORÇA E DISPARO';
 }
 
-function processControls(){
+function processControls(delta){
+const factor = delta / 16.66; // Normaliza movimento independente do FPS do dispositivo
 const a=tanks[currentTankIndex];
 if(a&&a.isPlayer&&!isShooting){
 if(moveDir!==0){
 a.isMoving=true;
 a.facing=moveDir>0?1:-1;
-a.x=Math.max(10,Math.min(logicalWidth-25,a.x+moveDir*.9));
+a.x=Math.max(10,Math.min(logicalWidth-25,a.x+moveDir*.9*factor));
 updateTankY(a);
 }else a.isMoving=false;
 
 if(angleDir!==0){
-a.angle+=angleDir*.8;
+a.angle+=angleDir*.8*factor;
 a.angle=Math.max(0,Math.min(85,a.angle));
 }
 
 if(isChargingPower){
-a.power += 0.8;
+a.power += 0.8 * factor;
 if(a.power > 100) a.power = 10;
 document.getElementById('powerText').textContent=`${Math.floor(a.power)}%`;
 }
 }
 }
 
-function gameLoop(){
-processControls();updatePhysicsObjects();updateAI();
+let lastFrameTime = performance.now();
+function gameLoop(now){
+const delta = Math.min(now - lastFrameTime, 50);
+lastFrameTime = now;
+
+processControls(delta);updatePhysicsObjects();updateAI();
 ctx.clearRect(0,0,logicalWidth,logicalHeight);
 updateProjectile();drawWorld();
 requestAnimationFrame(gameLoop);
 }
 
+// Processador universal de eventos do controle remoto Toshiba
 function handleKeyInput(e, isKeyDown) {
-  keepFocusOnBody();
+  keepTvFocus();
 
-  const k = e.key || e.keyCode;
-  const keyStr = String(k).toUpperCase();
+  const code = e.keyCode || e.which;
+  const keyName = (e.key || '').toUpperCase();
 
-  // Intercepta e desativa ações nativas de navegação na TV
-  if (['ARROWLEFT', 'ARROWRIGHT', 'ARROWUP', 'ARROWDOWN', 'ENTER', ' ', 'SELECT', 'OK', '13', '37', '38', '39', '40', '29443', 'VK_OK'].includes(keyStr)) {
+  // Lista estendida de códigos da Toshiba / VIDAA
+  const tvKeys = [37, 38, 39, 40, 13, 29443, 65385, 10009];
+  if (tvKeys.includes(code) || ['ARROWLEFT', 'ARROWRIGHT', 'ARROWUP', 'ARROWDOWN', 'ENTER', 'OK', 'SELECT'].includes(keyName)) {
     if (e.preventDefault) e.preventDefault();
   }
 
   const a = tanks[currentTankIndex];
   if (!a || !a.isPlayer) return;
 
-  // Seta Esquerda
-  if (keyStr === 'ARROWLEFT' || keyStr === 'LEFT' || k === 37) {
+  // Esquerda
+  if (code === 37 || keyName === 'ARROWLEFT' || keyName === 'LEFT') {
     moveDir = isKeyDown ? -1 : 0;
   }
-
-  // Seta Direita
-  if (keyStr === 'ARROWRIGHT' || keyStr === 'RIGHT' || k === 39) {
+  // Direita
+  if (code === 39 || keyName === 'ARROWRIGHT' || keyName === 'RIGHT') {
     moveDir = isKeyDown ? 1 : 0;
   }
-
-  // Seta Para Cima (Eleva mira)
-  if (keyStr === 'ARROWUP' || keyStr === 'UP' || k === 38) {
+  // Cima (Aumenta mira)
+  if (code === 38 || keyName === 'ARROWUP' || keyName === 'UP') {
     angleDir = isKeyDown ? 1 : 0;
   }
-
-  // Seta Para Baixo (Abaixa mira)
-  if (keyStr === 'ARROWDOWN' || keyStr === 'DOWN' || k === 40) {
+  // Baixo (Diminui mira)
+  if (code === 40 || keyName === 'ARROWDOWN' || keyName === 'DOWN') {
     angleDir = isKeyDown ? -1 : 0;
   }
 
-  // Botão OK / ENTER (Alternador simples para disparar no controle de TV)
-  if (keyStr === 'ENTER' || keyStr === ' ' || keyStr === 'SELECT' || keyStr === 'OK' || k === 13 || k === 29443) {
+  // OK / ENTER / Botão Central Toshiba
+  if (code === 13 || code === 29443 || keyName === 'ENTER' || keyName === 'OK' || keyName === 'SELECT') {
     if (isKeyDown) {
       if (!isShooting) {
         if (!isChargingPower) {
-          isChargingPower = true; // 1º toque/manter no OK: Começa a carregar a barra
+          isChargingPower = true;
         } else {
-          isChargingPower = false; // 2º toque no OK: Efetua o disparo imediato
+          isChargingPower = false;
           fireProjectile();
         }
       }
     } else {
-      // Se soltar o OK enquanto carrega, dispara (caso a TV suporte soltar teclas)
       if (isChargingPower) {
         isChargingPower = false;
         if (!isShooting) fireProjectile();
@@ -695,13 +716,17 @@ function handleKeyInput(e, isKeyDown) {
   }
 }
 
+// Escuta tanto na janela quanto no input invisível
 window.addEventListener('keydown', e => handleKeyInput(e, true));
 window.addEventListener('keyup', e => handleKeyInput(e, false));
 
-// Restaura o foco com qualquer clique na TV
-window.addEventListener('click', keepFocusOnBody);
+document.getElementById('tvInput').addEventListener('keydown', e => handleKeyInput(e, true));
+document.getElementById('tvInput').addEventListener('keyup', e => handleKeyInput(e, false));
 
-resizeCanvas();initStage();gameLoop();
+window.addEventListener('click', keepTvFocus);
+
+resizeCanvas();initStage();
+requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
