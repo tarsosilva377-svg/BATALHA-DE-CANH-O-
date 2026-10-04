@@ -66,10 +66,10 @@ canvas{width:100%;height:100%;display:block}
 </div>
 
 <script>
-// TRILHA SONORA DE FUNDO
+// TRILHA SONORA DE FUNDO (Volume regulado para 10%)
 const bgMusic = new Audio('the_big_fight.mp3');
 bgMusic.loop = true;
-bgMusic.volume = 0.4;
+bgMusic.volume = 0.1;
 
 let musicStarted = false;
 function startBgMusic() {
@@ -210,16 +210,17 @@ const ty = t.isPlayer ? targetCursor.y : (t.aiTargetY || logicalHeight/2);
 targetCursor.active = false;
 
 for(let i=-1; i<=1; i++){
-const spreadAngle = rad + (i * 0.15);
-const vx = Math.cos(spreadAngle) * bs * t.facing;
-const vy = -Math.sin(spreadAngle) * bs;
+const spreadAngle = (-Math.PI / 2) + (i * 0.25);
+const speed = 4.5;
 projectiles.push({
-x: hx + Math.cos(spreadAngle)*18*t.facing,
-y: sy - Math.sin(spreadAngle)*18,
-vx: vx, vy: vy,
-radius: 3, explosionRadius: w.radius, gravity: w.gravity, damage: w.damage, color: w.color,
+x: hx + (i * 10),
+y: sy - 15,
+vx: Math.cos(spreadAngle) * speed,
+vy: Math.sin(spreadAngle) * speed,
+radius: 3.5, explosionRadius: w.radius, gravity: 0, damage: w.damage, color: w.color,
 shooterTeam: t.team, shooterId: t.id, trail: [],
-isGuided: true, targetX: tx + (i*15), targetY: ty
+isGuided: true, targetX: tx + (i * 12), targetY: ty,
+lifeTime: 0
 });
 }
 }else{
@@ -319,8 +320,8 @@ ctx.restore();
 
 projectiles.forEach(p=>{
 p.trail.push({x:p.x,y:p.y});
-if(p.trail.length>6)p.trail.shift();
-ctx.save();ctx.strokeStyle='rgba(255,200,50,0.5)';ctx.lineWidth=2;
+if(p.trail.length>8)p.trail.shift();
+ctx.save();ctx.strokeStyle='rgba(255,200,50,0.6)';ctx.lineWidth=2.5;
 ctx.beginPath();
 for(let i=0;i<p.trail.length;i++){
 let pt=p.trail[i];if(i===0)ctx.moveTo(pt.x,pt.y);else ctx.lineTo(pt.x,pt.y);
@@ -413,10 +414,23 @@ let p = projectiles[i];
 const steps = 3;
 
 if(p.isGuided){
+p.lifeTime += 1;
+if(p.lifeTime > 12){
 const dx = p.targetX - p.x;
 const dy = p.targetY - p.y;
-p.vx += dx * 0.003;
-p.vy += dy * 0.003;
+const targetAngle = Math.atan2(dy, dx);
+const currentSpeed = 5.2;
+
+const curAngle = Math.atan2(p.vy, p.vx);
+let angleDiff = targetAngle - curAngle;
+
+while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+
+const newAngle = curAngle + angleDiff * 0.18;
+p.vx = Math.cos(newAngle) * currentSpeed;
+p.vy = Math.sin(newAngle) * currentSpeed;
+}
 }
 
 const subVx = p.vx / steps;
