@@ -83,10 +83,11 @@ if(!terrainHeights||terrainHeights.length===0)initStage();
 window.addEventListener('resize',resizeCanvas);
 
 let terrainHeights=[],rocks=[],tanks=[],effects=[],peakXsCache=[];
-// Aumentada velocidade das munições para trajetórias mais diretas e suaves
+
+// Reajuste perfeito da trajetória: Velocidade equilibrada com gravidade realista
 const weapons=[
-  {name:'Normal',symbol:'🔴',speed:.26,damage:35,radius:22,gravity:.28,color:'#ff4757'},
-  {name:'Bomba (Maior Dano)',symbol:'🟢',speed:.25,damage:60,radius:36,gravity:.29,color:'#2ecc71'}
+  {name:'Normal',symbol:'🔴',speed:.21,damage:35,radius:22,gravity:.22,color:'#ff4757'},
+  {name:'Bomba (Maior Dano)',symbol:'🟢',speed:.20,damage:60,radius:36,gravity:.23,color:'#2ecc71'}
 ];
 
 function generateIrregularVertices(r){const v=[],p=5+Math.floor(Math.random()*3);for(let i=0;i<p;i++){const a=(i/p)*Math.PI*2,rv=r*(.7+Math.random()*.6);v.push({x:Math.cos(a)*rv,y:Math.sin(a)*rv});}return v;}
@@ -178,7 +179,7 @@ const sy = t.y + 10;
 const vx = Math.cos(rad) * bs * t.facing;
 const vy = -Math.sin(rad) * bs;
 
-const spawnOffset = 22;
+const spawnOffset = 18;
 projectile={x:hx+Math.cos(rad)*spawnOffset*t.facing,y:sy-Math.sin(rad)*spawnOffset,vx:vx,vy:vy,radius:3,explosionRadius:w.radius,gravity:w.gravity,damage:w.damage,color:w.color,shooterTeam:t.team,shooterId:t.id,trail:[]};
 if(t.brain)t.brain.lastShotInfo={angle:t.angle,power:t.power,weaponIndex:wi,startX:t.x,startY:t.y};
 for(let p=0;p<8;p++){let fa=rad+(Math.random()*.4-.2),fs=1+Math.random()*3;effects.push({type:'fire',x:hx+Math.cos(rad)*spawnOffset*t.facing,y:sy-Math.sin(rad)*spawnOffset,vx:Math.cos(fa)*fs*t.facing,vy:-Math.sin(fa)*fs,life:.3,size:3+Math.random()*4,color:'#ffaa00'});}
@@ -344,7 +345,6 @@ ctx.restore();
 
 function updateProjectile(){
 if(!projectile)return;
-// Subdividir passos de colisão para tiros ultrarrápidos não atravessarem o terreno
 const steps = 3;
 const subVx = projectile.vx / steps;
 const subVy = projectile.vy / steps;
@@ -411,15 +411,6 @@ at.brain.shotsCount++;
 if(td>0){
 at.brain.score+=Math.floor(td*2);
 aiGlobalBrain.successfulShotsMemory.push({fromX:at.x,toX:projectile.x,angle:at.angle,power:at.power,terrainHeightAtShot:getTerrainY(at.x)});
-}else{
-const en=tanks.filter(t=>t.team!==at.team&&t.health>0);
-if(en.length>0){
-let ce=en[0],md=Math.hypot(projectile.x-(en[0].x+8),projectile.y-(en[0].y+14));
-en.forEach(e=>{const d=Math.hypot(projectile.x-(e.x+8),projectile.y-(e.y+14));if(d<md){md=d;ce=e;}});
-const tcx=ce.x+8,acx=at.x+8,fs=(acx<tcx)?(projectile.x<tcx):(projectile.x>tcx);
-at.brain.powerCorrection+=fs?2:-2;
-at.brain.powerCorrection=Math.max(-30,Math.min(30,at.brain.powerCorrection));
-}
 }
 }
 
@@ -446,7 +437,7 @@ document.getElementById('turnIndicator').textContent='🟢 ALIADO ATIRANDO...';
 document.getElementById('aiAmmoIndicator').style.display='none';
 setTimeout(()=>executeAIShot(a),300);
 }else{
-document.getElementById('turnIndicator').textContent='🤖 IA ANALISANDO O TERRENO...';
+document.getElementById('turnIndicator').textContent='🤖 IA SIMULANDO TRAJETÓRIA...';
 const cy=getTerrainY(a.x),ly=getTerrainY(a.x-20),ry=getTerrainY(a.x+20),ic=(ly<cy-12)&&(ry<cy-12);
 if((a.brain&&a.brain.wasHitLastTurn)||ic){
 if(a.brain)a.brain.wasHitLastTurn=false;
@@ -461,33 +452,35 @@ setTimeout(()=>executeAIShot(a),300);
 }
 }
 
-function simulateShot(shooter, ad, pv, wo) {
+// SIMULADOR DE TRAJETÓRIA VIRTUAL PARA IA (OPÇÃO A)
+function simulateShotVirtual(shooter, ad, pv, wo) {
 const rad = ad * Math.PI / 180;
 const pm = .5 + (pv / 100) * 2.2;
 const bs = wo.speed * pm * (logicalWidth / 12);
 const hx = shooter.x + shooter.width / 2;
 const sy = shooter.y + 10;
-const spawnOffset = 22;
+const spawnOffset = 18;
 
 let x = hx + Math.cos(rad) * spawnOffset * shooter.facing;
 let y = sy - Math.sin(rad) * spawnOffset;
 let vx = Math.cos(rad) * bs * shooter.facing;
 let vy = -Math.sin(rad) * bs;
 
-for (let s = 0; s < 350; s++) {
+// Correção do Bug de Curto Alcance: ignora colisão com o próprio robô no primeiro metro
+for (let s = 0; s < 450; s++) {
 vy += wo.gravity;
 x += vx;
 y += vy;
 
 for (let t of tanks) {
 if (t.health <= 0 || t.id === shooter.id) continue;
-const boxX = t.x - 8;
-const boxY = t.y - 8;
-const boxWidth = t.width + 16;
-const boxHeight = t.height + 16;
+const boxX = t.x - 10;
+const boxY = t.y - 10;
+const boxWidth = t.width + 20;
+const boxHeight = t.height + 20;
 
 if (x >= boxX && x <= boxX + boxWidth && y >= boxY && y <= boxY + boxHeight) {
-return { hitX: x, hitY: y, hitTank: t };
+return { hitX: x, hitY: y, hitTank: t, directHit: true };
 }
 }
 
@@ -507,67 +500,67 @@ function executeAIShot(at){
 if(at.health<=0)return;
 const en=tanks.filter(t=>t.team!==at.team&&t.health>0);
 if(!en.length)return;
+
 let tg=en[0];
 if(currentStage>=6)tg=en.reduce((l,c)=>(c.health<l.health?c:l),en[0]);
 else tg=en[Math.floor(Math.random()*en.length)];
 
-const tcx=tg.x+8,acx=at.x+8,acy=at.y,dist=Math.abs(acx-tcx);
+const tcx=tg.x+8, acx=at.x+8, dist=Math.abs(acx-tcx);
 at.facing=(tcx>acx)?1:-1;
 
 let cwi=0;
-if(currentStage>=13&&(dist<120||tg.health<=45))cwi=1;
+if(currentStage>=10 && (dist<140 || tg.health<=50)) cwi=1;
 at.chosenWeapon=cwi;
-
 const wp=weapons[cwi];
-let ba=60,bp=55,fs=false;
 
-const ca=[35,45,55,65,75,80];
-let bestCandidate=null;
-let mm=Infinity;
+let bestAngle = 45;
+let bestPower = 50;
+let minDistanceToTarget = Infinity;
+let foundDirectHit = false;
 
-for(let at2 of ca){
-for(let pt=20;pt<=100;pt+=4){
-const sr=simulateShot(at,at2,pt,wp);
+// ALGORITMO DE SIMULAÇÃO INTELIGENTE (Testa dezenas de trajetórias antes de atirar)
+const testAngles = [15, 25, 35, 45, 55, 65, 75, 82];
+for(let aCode of testAngles){
+for(let pCode = 15; pCode <= 100; pCode += 3){
+const simResult = simulateShotVirtual(at, aCode, pCode, wp);
 
-if(sr.hitTank&&sr.hitTank.team===at.team) continue;
-
-if(sr.collidedTerrain){
-let allyNearExp=tanks.some(t=>t.team===at.team&&t.health>0&&Math.hypot(sr.hitX-(t.x+t.width/2),sr.hitY-(t.y+t.height/2))<=wp.radius+15);
-if(allyNearExp) continue;
+// Se acertar o robô ou causar explosão perto
+if(simResult.hitTank && simResult.hitTank.team !== at.team){
+bestAngle = aCode;
+bestPower = pCode;
+foundDirectHit = true;
+break;
 }
 
-const md2=Math.abs(sr.hitX-tcx);
-
-if(sr.hitTank&&sr.hitTank.team!==at.team){
-ba=at2;bp=pt;fs=true;break;
+// Se colidir com terreno próximo do inimigo (Área de dano de raio)
+if(simResult.collidedTerrain){
+let distToEnemy = Math.abs(simResult.hitX - tcx);
+if(distToEnemy < wp.radius * 0.85){
+bestAngle = aCode;
+bestPower = pCode;
+foundDirectHit = true;
+break;
 }
 
-if(md2<wp.radius&&!fs){
-ba=at2;bp=pt;fs=true;break;
+if(distToEnemy < minDistanceToTarget){
+minDistanceToTarget = distToEnemy;
+bestAngle = aCode;
+bestPower = pCode;
+}
+}
+}
+if(foundDirectHit) break;
 }
 
-if(md2<mm){
-mm=md2;
-bestCandidate={angle:at2,power:pt};
-}
-}
-if(fs)break;
-}
-
-if(!fs&&bestCandidate){
-ba=bestCandidate.angle;
-bp=bestCandidate.power;
-}
-
-if(at.brain&&fs)bp+=at.brain.powerCorrection;
-at.angle=ba;
-at.power=Math.min(100,Math.max(10,bp));
+at.angle = bestAngle;
+at.power = Math.min(100, Math.max(10, bestPower));
 fireProjectile();
 }
 
 function updateAI(){
 const a=tanks[currentTankIndex];
 if(!a.isPlayer&&a.isMoving){
+// Ajustada velocidade de caminhada para 1.8 (mais suave e firme)
 const s=1.8;
 if(Math.abs(a.x-a.targetX)>s){
 a.x+=(a.targetX>a.x)?s:-s;
@@ -620,8 +613,7 @@ if(a&&a.isPlayer&&!isShooting){
 if(moveDir!==0){
 a.isMoving=true;
 a.facing=moveDir>0?1:-1;
-// Velocidade de andar acelerada para maior fluidez (2.4px por frame)
-a.x=Math.max(10,Math.min(logicalWidth-25,a.x+moveDir*2.4));
+a.x=Math.max(10,Math.min(logicalWidth-25,a.x+moveDir*1.8));
 updateTankY(a);
 }else a.isMoving=false;
 
@@ -695,49 +687,42 @@ const keyCode = e.keyCode;
 if (keyState[code || k]) return;
 keyState[code || k] = true;
 
-// 1. Mover Esquerda / Trás: Tecla 4 / Numpad 4 / Seta Esquerda
 if (code === 'Digit4' || code === 'Numpad4' || keyCode === 52 || keyCode === 100 || k === 'ArrowLeft') {
 moveDir = -1;
 moveLeftBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 2. Mover Direita / Avançar: Tecla 6 / Numpad 6 / Seta Direita
 if (code === 'Digit6' || code === 'Numpad6' || keyCode === 54 || keyCode === 102 || k === 'ArrowRight') {
 moveDir = 1;
 moveRightBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 3. Ajustar Ângulo Cima: Tecla 2 / Numpad 2 / Seta Cima
 if (code === 'Digit2' || code === 'Numpad2' || keyCode === 50 || keyCode === 98 || k === 'ArrowUp') {
 angleDir = 1;
 anglePlusBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 4. Ajustar Ângulo Baixo: Tecla 8 / Numpad 8 / Seta Baixo
 if (code === 'Digit8' || code === 'Numpad8' || keyCode === 56 || keyCode === 104 || k === 'ArrowDown') {
 angleDir = -1;
 angleMinusBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 5. Diminuir Força: Tecla 1 / Numpad 1 / Tecla 'A'
 if (code === 'Digit1' || code === 'Numpad1' || keyCode === 49 || keyCode === 97 || k === 'a' || k === 'A') {
 forceDir = -1;
 forceMinusBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 6. Aumentar Força: Tecla 3 / Numpad 3 / Tecla 'S'
 if (code === 'Digit3' || code === 'Numpad3' || keyCode === 51 || keyCode === 99 || k === 's' || k === 'S') {
 forceDir = 1;
 forcePlusBtn.classList.add('active-key');
 e.preventDefault();
 }
 
-// 7. Atirar: Tecla 5 / OK / Enter / Espaço
 if (code === 'Digit5' || code === 'Numpad5' || keyCode === 53 || keyCode === 101 || k === ' ' || k === 'Space' || k === 'Enter' || keyCode === 13 || keyCode === 29443 || keyCode === 10252) {
 fireBtn.classList.add('active-key');
 const a = tanks[currentTankIndex];
@@ -747,13 +732,11 @@ fireProjectile();
 e.preventDefault();
 }
 
-// 8. Selecionar Munição Normal: Botão Vermelho do Controle da TV (VK_RED / 403 / 'PROG_RED' / 'red')
 if (k === 'Red' || k === 'PROG_RED' || k === 'red' || keyCode === 403 || keyCode === 82) {
 selectWeaponIndex(0);
 e.preventDefault();
 }
 
-// 9. Selecionar Munição Maior Dano: Botão Verde do Controle da TV (VK_GREEN / 404 / 'PROG_GREEN' / 'green')
 if (k === 'Green' || k === 'PROG_GREEN' || k === 'green' || keyCode === 404 || keyCode === 71) {
 selectWeaponIndex(1);
 e.preventDefault();
